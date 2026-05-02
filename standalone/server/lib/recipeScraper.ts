@@ -348,31 +348,148 @@ function extractKeywordsFromHtml(html: string): string[] {
   return [];
 }
 
+// ── ingredient blob splitter ───────────────────────────────────────────────
+
+const INGREDIENT_SPLIT_RE = /(?<=[a-zA-Z\).])\s+(?=(?:\d+[\s/]|[½¼⅓⅔¾⅛⅜⅝⅞]))/g;
+
+function splitIngredientBlob(text: string): string[] {
+  if (/\n/.test(text)) return text.split(/\n+/).map((s) => s.trim()).filter(Boolean);
+  const parts = text.split(INGREDIENT_SPLIT_RE).map((s) => s.trim()).filter(Boolean);
+  const LOOKS_LIKE = /^(?:\d|[½¼⅓⅔¾⅛⅜⅝⅞]|a\s|some\s|pinch|handful)/i;
+  if (parts.length > 1 && parts.every((p) => LOOKS_LIKE.test(p))) return parts;
+  return [text];
+}
+
+function maybeSplitIngredient(raw: string): string[] {
+  const text = cleanText(raw);
+  const measureCount = (text.match(/\b(?:cup|tablespoon|teaspoon|tbsp|tsp|pound|lb|oz|gram|pinch)\b/gi) ?? []).length;
+  return measureCount > 1 ? splitIngredientBlob(text) : [text];
+}
+
+function stripTags(s: string): string {
+  return s.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+// ── heading-based extraction ───────────────────────────────────────────────
+
+/**
+ * Find the HTML block that immediately follows a heading matching headingRe.
+ * Returns the raw inner HTML of that block (ul, ol, or div/section/p sequence).
+ */
+function extractBlockAfterHeading(html: string, headingRe: RegExp): string | null {
+  // Match headings: h2/h3/h4/h5, dt, th, or any element whose text matches
+  const headingPattern = /<(?:h[2-5]|dt|th|strong|b)[^>]*>([\s\S]*?)<\/(?:h[2-5]|dt|th|strong|b)>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = headingPattern.exec(html)) !== null) {
+    const headingText = stripTags(m[1]);
+    if (!headingRe.test(headingText.replace(/[:\s]+$/, ""))) continue;
+    const afterHeading = html.slice(m.index + m[0].length);
+    // Find next <ul>, <ol>, or a <div>/<section> containing <li> or <p>
+    const listMatch = afterHeading.match(/^[\s\S]{0,500}?(<(?:ul|ol)[^>]*>[\s\S]*?<\/(?:ul|ol)>)/i);
+    if (listMatch) return listMatch[1];
+    // Fall back to first block element with substance
+    const blockMatch = afterHeading.match(/^[\s\S]{0,500}?(<(?:div|section|article)[^>]*>[\s\S]{20,2000}?<\/(?:div|section|article)>)/i);
+    if (blockMatch) return blockMatch[1];
+  }
+  return null;
+}
+
+function extractListItems(block: string): string[] {
+  const items = [...block.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)]
+    .map((m) => cleanText(stripTags(m[1])))
+    .filter((t) => t.length > 2);
+  if (items.length > 0) return items;
+  // Fallback: paragraphs
+  return [...block.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)]
+    .map((m) => cleanText(stripTags(m[1])))
+    .filter((t) => t.length > 15 && !/^(print|save|jump|share|subscribe)/i.test(t));
+}
+
+// ── ingredient extraction ──────────────────────────────────────────────────
+
 function extractIngredientsFromHtml(html: string): string[] {
-  const patterns = [
+  // 1. Microdata
+  const microdata = [...html.matchAll(/itemprop=["'](?:recipeIngredient|ingredients)["'][^>]*>([\s\S]*?)<\//gi)]
+    .map((m) => cleanText(stripTags(m[1]))).filter(Boolean);
+  if (microdata.length > 0) return microdata.flatMap(maybeSplitIngredient);
+
+  // 2. Known plugin class patterns (ordered most-specific first)
+  const classPatterns = [
+    // WP Recipe Maker
+    /<li[^>]*class="[^"]*wprm-recipe-ingredient[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
+    // Tasty Recipes
+    /<li[^>]*class="[^"]*tasty-recipes-ingredient[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
+    // Mediavine Create
+    /<li[^>]*class="[^"]*mv-create-ingredient[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
+    // Generic ingredient class on <li>
     /<li[^>]*class="[^"]*ingredient[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
-    /<span[^>]*class="[^"]*ingredient[^"]*"[^>]*>([\s\S]*?)<\/span>/gi,
+    // Generic ingredient class on <span> or <p>
+    /<(?:span|p)[^>]*class="[^"]*ingredient[^"]*"[^>]*>([\s\S]*?)<\/(?:span|p)>/gi,
+    // itemprop shorthand
+    /<[^>]+itemprop="[^"]*ingredient[^"]*"[^>]*>([\s\S]*?)<\/[^>]+>/gi,
   ];
-  for (const pattern of patterns) {
-    const matches = [...html.matchAll(pattern)];
-    if (matches.length > 0) {
-      return matches.map((m) => cleanText(m[1].replace(/<[^>]+>/g, ""))).filter(Boolean);
+  for (const pat of classPatterns) {
+    const matches = [...html.matchAll(pat)];
+    if (matches.length > 1) {
+      return matches.map((m) => cleanText(stripTags(m[1]))).filter(Boolean).flatMap(maybeSplitIngredient);
     }
   }
+
+  // 3. Heading-based fallback
+  const block = extractBlockAfterHeading(html, /^ingredients?$/i);
+  if (block) {
+    const items = extractListItems(block);
+    if (items.length > 0) return items.flatMap(maybeSplitIngredient);
+  }
+
   return [];
 }
 
+// ── instruction extraction ─────────────────────────────────────────────────
+
 function extractInstructionsFromHtml(html: string): string[] {
-  const patterns = [
+  // 1. Microdata
+  const microBlocks = [...html.matchAll(/itemprop=["']recipeInstructions["'][^>]*>([\s\S]*?)<\/(?:div|section|ol|ul|li|span|p)>/gi)];
+  if (microBlocks.length > 0) {
+    const steps: string[] = [];
+    for (const m of microBlocks) {
+      const inner = m[1];
+      const liItems = [...inner.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)]
+        .map((x) => cleanText(stripTags(x[1]))).filter(Boolean);
+      if (liItems.length > 0) { steps.push(...liItems); continue; }
+      const textProp = inner.match(/itemprop=["']text["'][^>]*>([\s\S]*?)<\//i);
+      if (textProp) { steps.push(cleanText(stripTags(textProp[1]))); continue; }
+      const text = cleanText(stripTags(inner));
+      if (text.length > 10) steps.push(text);
+    }
+    if (steps.length > 0) return steps;
+  }
+
+  // 2. Known plugin class patterns
+  const classPatterns = [
+    /<li[^>]*class="[^"]*wprm-recipe-instruction[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
+    /<li[^>]*class="[^"]*tasty-recipes-instruction[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
+    /<li[^>]*class="[^"]*mv-create-instruction[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
     /<li[^>]*class="[^"]*instruction[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
     /<li[^>]*class="[^"]*step[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
     /<p[^>]*class="[^"]*instruction[^"]*"[^>]*>([\s\S]*?)<\/p>/gi,
+    /<p[^>]*class="[^"]*step[^"]*"[^>]*>([\s\S]*?)<\/p>/gi,
+    /<li[^>]*class="[^"]*direction[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
+    /<p[^>]*class="[^"]*direction[^"]*"[^>]*>([\s\S]*?)<\/p>/gi,
   ];
-  for (const pattern of patterns) {
-    const matches = [...html.matchAll(pattern)];
+  for (const pat of classPatterns) {
+    const matches = [...html.matchAll(pat)];
     if (matches.length > 0) {
-      return matches.map((m) => cleanText(m[1].replace(/<[^>]+>/g, ""))).filter(Boolean);
+      return matches.map((m) => cleanText(stripTags(m[1]))).filter((t) => t.length > 5);
     }
   }
+
+  // 3. Heading-based fallback
+  const block = extractBlockAfterHeading(html, /^(instructions?|directions?|steps?|method|preparation|how to make)$/i);
+  if (block) {
+    const items = extractListItems(block);
+    if (items.length > 0) return items;
+  }
+
   return [];
 }
