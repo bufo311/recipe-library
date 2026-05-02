@@ -1,7 +1,10 @@
 import { Link } from "wouter";
-import { BookOpen } from "lucide-react";
+import { BookOpen, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { logout } = useAuth();
+
   return (
     <div className="min-h-[100dvh] flex flex-col selection:bg-primary/20 selection:text-primary">
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-50">
@@ -14,6 +17,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/recipe/new" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Write a Recipe
             </Link>
+            <button
+              onClick={logout}
+              title="Sign out"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>

@@ -7,6 +7,8 @@ import Dashboard from "@/pages/dashboard";
 import RecipeDetail from "@/pages/recipe-detail";
 import RecipeNew from "@/pages/recipe-new";
 import RecipeEdit from "@/pages/recipe-edit";
+import LoginPage from "@/pages/login";
+import { AuthProvider, useAuth } from "@/lib/auth";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,13 +30,23 @@ function AppRoutes() {
   );
 }
 
+function AuthGate() {
+  const { authenticated } = useAuth();
+  if (!authenticated) return <LoginPage />;
+  return (
+    <Router base={base}>
+      <AppRoutes />
+    </Router>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Router base={base}>
-          <AppRoutes />
-        </Router>
+        <AuthProvider>
+          <AuthGate />
+        </AuthProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

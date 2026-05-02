@@ -7,6 +7,8 @@ import Dashboard from "@/pages/dashboard";
 import RecipeDetail from "@/pages/recipe-detail";
 import RecipeNew from "@/pages/recipe-new";
 import RecipeEdit from "@/pages/recipe-edit";
+import LoginPage from "@/pages/login";
+import { AuthProvider, useAuth } from "@/lib/auth";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,13 +31,24 @@ function Router() {
   );
 }
 
+function AuthGate() {
+  const { authenticated, loading } = useAuth();
+  if (loading) return null;
+  if (!authenticated) return <LoginPage />;
+  return (
+    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+      <Router />
+    </WouterRouter>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
+        <AuthProvider>
+          <AuthGate />
+        </AuthProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
