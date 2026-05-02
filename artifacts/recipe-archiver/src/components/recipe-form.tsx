@@ -7,8 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { uploadImage } from "@/lib/image-upload";
-import { Plus, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { CreatableCombobox } from "@/components/creatable-combobox";
+import { AttributeMultiSelect } from "@/components/attribute-multiselect";
+import { useGetRecipeFacets } from "@workspace/api-client-react";
 
 const recipeSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -20,6 +23,9 @@ const recipeSchema = z.object({
   prepTime: z.string().optional().or(z.literal("")),
   cookTime: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
+  course: z.string().optional().or(z.literal("")),
+  cuisine: z.string().optional().or(z.literal("")),
+  attribute: z.array(z.string()).default([]),
   ingredients: z.array(z.object({ value: z.string().min(1, "Cannot be empty") })).min(1, "At least one ingredient is required"),
   instructions: z.array(z.object({ value: z.string().min(1, "Cannot be empty") })).min(1, "At least one instruction is required"),
 });
@@ -35,6 +41,7 @@ interface RecipeFormProps {
 export function RecipeForm({ defaultValues, onSubmit, isSubmitting }: RecipeFormProps) {
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
+  const { data: facets } = useGetRecipeFacets();
 
   const form = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeSchema),
@@ -48,6 +55,9 @@ export function RecipeForm({ defaultValues, onSubmit, isSubmitting }: RecipeForm
       prepTime: defaultValues?.prepTime || "",
       cookTime: defaultValues?.cookTime || "",
       notes: defaultValues?.notes || "",
+      course: defaultValues?.course || "",
+      cuisine: defaultValues?.cuisine || "",
+      attribute: defaultValues?.attribute || [],
       ingredients: defaultValues?.ingredients?.length ? defaultValues.ingredients : [{ value: "" }],
       instructions: defaultValues?.instructions?.length ? defaultValues.instructions : [{ value: "" }],
     },
@@ -73,23 +83,19 @@ export function RecipeForm({ defaultValues, onSubmit, isSubmitting }: RecipeForm
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
         <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Grandma's Apple Pie" className="text-xl font-serif h-14" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. Grandma's Apple Pie" className="text-xl font-serif h-14" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
@@ -176,10 +182,10 @@ export function RecipeForm({ defaultValues, onSubmit, isSubmitting }: RecipeForm
                 </FormItem>
               )}
             />
-            
+
             <FormItem>
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Recipe Image</label>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mt-2">
                 <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={isUploading} className="flex-1" />
                 {isUploading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
               </div>
@@ -189,6 +195,67 @@ export function RecipeForm({ defaultValues, onSubmit, isSubmitting }: RecipeForm
                 </div>
               )}
             </FormItem>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-2xl font-serif border-b border-border/50 pb-2">Classification</h3>
+          <p className="text-sm text-muted-foreground">Tag this recipe to make it easy to find. Select existing tags or type to create new ones.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FormField
+              control={form.control}
+              name="course"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Course</FormLabel>
+                  <FormControl>
+                    <CreatableCombobox
+                      options={facets?.courses ?? []}
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="e.g. Dinner, Dessert"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cuisine"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cuisine</FormLabel>
+                  <FormControl>
+                    <CreatableCombobox
+                      options={facets?.cuisines ?? []}
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="e.g. Italian, Mexican"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="attribute"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Attributes</FormLabel>
+                  <FormControl>
+                    <AttributeMultiSelect
+                      options={facets?.attributes ?? []}
+                      value={field.value || []}
+                      onChange={field.onChange}
+                      placeholder="e.g. Quick, Vegetarian"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </div>
 

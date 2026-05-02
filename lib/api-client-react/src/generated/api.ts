@@ -24,6 +24,7 @@ import type {
   HealthStatus,
   ListRecipesParams,
   Recipe,
+  RecipeFacets,
   RecipeStats,
   RecipeSummary,
   ScrapeRecipeBody,
@@ -546,6 +547,81 @@ export function useGetRecentRecipes<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetRecentRecipesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get all distinct facet values across recipes
+ */
+export const getGetRecipeFacetsUrl = () => {
+  return `/api/recipes/facets`;
+};
+
+export const getRecipeFacets = async (
+  options?: RequestInit,
+): Promise<RecipeFacets> => {
+  return customFetch<RecipeFacets>(getGetRecipeFacetsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetRecipeFacetsQueryKey = () => {
+  return [`/api/recipes/facets`] as const;
+};
+
+export const getGetRecipeFacetsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRecipeFacets>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getRecipeFacets>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetRecipeFacetsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecipeFacets>>> = ({
+    signal,
+  }) => getRecipeFacets({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRecipeFacets>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRecipeFacetsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRecipeFacets>>
+>;
+export type GetRecipeFacetsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get all distinct facet values across recipes
+ */
+
+export function useGetRecipeFacets<
+  TData = Awaited<ReturnType<typeof getRecipeFacets>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getRecipeFacets>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRecipeFacetsQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

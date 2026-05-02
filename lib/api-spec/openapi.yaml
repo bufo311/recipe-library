@@ -45,6 +45,24 @@ paths:
           schema:
             type: string
           description: Filter by category
+        - name: course
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by course facet
+        - name: cuisine
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by cuisine facet
+        - name: attribute
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by attribute facet (recipes containing this attribute)
       responses:
         "200":
           description: List of recipes
@@ -131,6 +149,19 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/RecipeSummary"
+
+  /recipes/facets:
+    get:
+      operationId: getRecipeFacets
+      tags: [recipes]
+      summary: Get all distinct facet values across recipes
+      responses:
+        "200":
+          description: All available facet values
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeFacets"
 
   /recipes/{id}:
     get:
@@ -268,11 +299,22 @@ components:
         sourceUrl:
           type: string
           nullable: true
+        course:
+          type: string
+          nullable: true
+        cuisine:
+          type: string
+          nullable: true
+        attribute:
+          type: array
+          items:
+            type: string
         createdAt:
           type: string
       required:
         - id
         - title
+        - attribute
         - createdAt
 
     Recipe:
@@ -314,6 +356,16 @@ components:
         cookTime:
           type: string
           nullable: true
+        course:
+          type: string
+          nullable: true
+        cuisine:
+          type: string
+          nullable: true
+        attribute:
+          type: array
+          items:
+            type: string
         createdAt:
           type: string
         updatedAt:
@@ -323,6 +375,7 @@ components:
         - title
         - ingredients
         - instructions
+        - attribute
         - createdAt
         - updatedAt
 
@@ -399,6 +452,16 @@ components:
         cookTime:
           type: string
           nullable: true
+        course:
+          type: string
+          nullable: true
+        cuisine:
+          type: string
+          nullable: true
+        attribute:
+          type: array
+          items:
+            type: string
       required:
         - title
         - ingredients
@@ -441,6 +504,16 @@ components:
         cookTime:
           type: string
           nullable: true
+        course:
+          type: string
+          nullable: true
+        cuisine:
+          type: string
+          nullable: true
+        attribute:
+          type: array
+          items:
+            type: string
 
     ScrapeRecipeBody:
       type: object
@@ -474,6 +547,26 @@ components:
         - totalRecipes
         - categoryCounts
         - recentCount
+
+    RecipeFacets:
+      type: object
+      properties:
+        courses:
+          type: array
+          items:
+            type: string
+        cuisines:
+          type: array
+          items:
+            type: string
+        attributes:
+          type: array
+          items:
+            type: string
+      required:
+        - courses
+        - cuisines
+        - attributes
 
     ConversionResult:
       type: object

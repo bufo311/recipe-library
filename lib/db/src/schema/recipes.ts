@@ -15,6 +15,9 @@ export const recipesTable = pgTable("recipes", {
   totalTime: text("total_time"),
   prepTime: text("prep_time"),
   cookTime: text("cook_time"),
+  course: text("course"),
+  cuisine: text("cuisine"),
+  attribute: jsonb("attribute").$type<string[]>().notNull().default([]),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

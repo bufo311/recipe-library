@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { eq, desc, count, sql, ilike, or } from "drizzle-orm";
+import { eq, desc, count, sql, ilike, or, and } from "drizzle-orm";
 import { db, recipesTable } from "@workspace/db";
 import {
   CreateRecipeBody,
@@ -58,22 +58,36 @@ router.get("/recipes", async (req, res) => {
         yields: recipesTable.yields,
         category: recipesTable.category,
         sourceUrl: recipesTable.sourceUrl,
+        course: recipesTable.course,
+        cuisine: recipesTable.cuisine,
+        attribute: recipesTable.attribute,
         createdAt: recipesTable.createdAt,
       })
       .from(recipesTable)
       .$dynamic();
 
+    const conditions = [];
+
     if (params.search) {
-      const searchLower = `%${params.search}%`;
-      baseQuery = baseQuery.where(
-        or(
-          ilike(recipesTable.title, searchLower),
-        )
+      conditions.push(ilike(recipesTable.title, `%${params.search}%`));
+    }
+    if (params.category) {
+      conditions.push(eq(recipesTable.category, params.category));
+    }
+    if (params.course) {
+      conditions.push(eq(recipesTable.course, params.course));
+    }
+    if (params.cuisine) {
+      conditions.push(eq(recipesTable.cuisine, params.cuisine));
+    }
+    if (params.attribute) {
+      conditions.push(
+        sql`${recipesTable.attribute} @> ${JSON.stringify([params.attribute])}::jsonb`
       );
     }
 
-    if (params.category) {
-      baseQuery = baseQuery.where(eq(recipesTable.category, params.category));
+    if (conditions.length > 0) {
+      baseQuery = baseQuery.where(and(...conditions));
     }
 
     const recipes = await baseQuery.orderBy(desc(recipesTable.createdAt));
@@ -81,6 +95,7 @@ router.get("/recipes", async (req, res) => {
     res.json(
       recipes.map((r) => ({
         ...r,
+        attribute: (r.attribute as string[]) ?? [],
         createdAt: r.createdAt.toISOString(),
       }))
     );
@@ -113,6 +128,9 @@ router.post("/recipes", async (req, res) => {
         totalTime: data.totalTime ?? null,
         prepTime: data.prepTime ?? null,
         cookTime: data.cookTime ?? null,
+        course: data.course ?? null,
+        cuisine: data.cuisine ?? null,
+        attribute: data.attribute ?? [],
       })
       .returning();
 
@@ -143,9 +161,7 @@ router.post("/recipes/scrape", async (req, res) => {
 router.get("/recipes/stats", async (req, res) => {
   try {
     const [[{ total }], categoryCounts, recentResult] = await Promise.all([
-      db
-        .select({ total: count() })
-        .from(recipesTable),
+      db.select({ total: count() }).from(recipesTable),
       db
         .select({ category: recipesTable.category, count: count() })
         .from(recipesTable)
@@ -184,6 +200,9 @@ router.get("/recipes/recent", async (req, res) => {
         yields: recipesTable.yields,
         category: recipesTable.category,
         sourceUrl: recipesTable.sourceUrl,
+        course: recipesTable.course,
+        cuisine: recipesTable.cuisine,
+        attribute: recipesTable.attribute,
         createdAt: recipesTable.createdAt,
       })
       .from(recipesTable)
@@ -193,12 +212,36 @@ router.get("/recipes/recent", async (req, res) => {
     res.json(
       recipes.map((r) => ({
         ...r,
+        attribute: (r.attribute as string[]) ?? [],
         createdAt: r.createdAt.toISOString(),
       }))
     );
   } catch (err) {
     req.log.error({ err }, "Failed to get recent recipes");
     res.status(500).json({ error: "Failed to get recent recipes" });
+  }
+});
+
+router.get("/recipes/facets", async (req, res) => {
+  try {
+    const rows = await db
+      .select({
+        course: recipesTable.course,
+        cuisine: recipesTable.cuisine,
+        attribute: recipesTable.attribute,
+      })
+      .from(recipesTable);
+
+    const courses = [...new Set(rows.map((r) => r.course).filter((v): v is string => !!v))].sort();
+    const cuisines = [...new Set(rows.map((r) => r.cuisine).filter((v): v is string => !!v))].sort();
+    const attributes = [
+      ...new Set(rows.flatMap((r) => (r.attribute as string[]) ?? [])),
+    ].sort();
+
+    res.json({ courses, cuisines, attributes });
+  } catch (err) {
+    req.log.error({ err }, "Failed to get facets");
+    res.status(500).json({ error: "Failed to get facets" });
   }
 });
 
@@ -258,6 +301,9 @@ router.put("/recipes/:id", async (req, res) => {
     if (data.totalTime !== undefined) updates.totalTime = data.totalTime ?? null;
     if (data.prepTime !== undefined) updates.prepTime = data.prepTime ?? null;
     if (data.cookTime !== undefined) updates.cookTime = data.cookTime ?? null;
+    if (data.course !== undefined) updates.course = data.course ?? null;
+    if (data.cuisine !== undefined) updates.cuisine = data.cuisine ?? null;
+    if (data.attribute !== undefined) updates.attribute = data.attribute ?? [];
 
     const [recipe] = await db
       .update(recipesTable)
@@ -364,6 +410,7 @@ router.get("/uploads/:filename", (req, res) => {
 function serializeRecipe(recipe: typeof recipesTable.$inferSelect) {
   return {
     ...recipe,
+    attribute: (recipe.attribute as string[]) ?? [],
     createdAt: recipe.createdAt.toISOString(),
     updatedAt: recipe.updatedAt.toISOString(),
   };

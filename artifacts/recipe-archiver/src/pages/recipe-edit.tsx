@@ -12,7 +12,7 @@ export default function RecipeEdit() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const { data: recipe, isLoading } = useGetRecipe(recipeId, {
     query: { enabled: !!recipeId, queryKey: getGetRecipeQueryKey(recipeId) }
   });
@@ -44,6 +44,9 @@ export default function RecipeEdit() {
         prepTime: values.prepTime || undefined,
         cookTime: values.cookTime || undefined,
         notes: values.notes || undefined,
+        course: values.course || undefined,
+        cuisine: values.cuisine || undefined,
+        attribute: values.attribute || [],
         ingredients: values.ingredients.map(i => i.value),
         instructions: values.instructions.map(i => i.value),
       }
@@ -80,6 +83,9 @@ export default function RecipeEdit() {
     prepTime: recipe.prepTime || "",
     cookTime: recipe.cookTime || "",
     notes: recipe.notes || "",
+    course: recipe.course || "",
+    cuisine: recipe.cuisine || "",
+    attribute: recipe.attribute || [],
     ingredients: recipe.ingredients.map(i => ({ value: i })),
     instructions: recipe.instructions.map(i => ({ value: i })),
   };

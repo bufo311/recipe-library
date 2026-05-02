@@ -9,7 +9,7 @@ export default function RecipeNew() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const createRecipe = useCreateRecipe({
     mutation: {
       onSuccess: (data) => {
@@ -35,6 +35,9 @@ export default function RecipeNew() {
         prepTime: values.prepTime || undefined,
         cookTime: values.cookTime || undefined,
         notes: values.notes || undefined,
+        course: values.course || undefined,
+        cuisine: values.cuisine || undefined,
+        attribute: values.attribute || [],
         ingredients: values.ingredients.map(i => i.value),
         instructions: values.instructions.map(i => i.value),
       }
