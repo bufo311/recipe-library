@@ -178,7 +178,7 @@ export function RecipeForm({ defaultValues, onSubmit, isSubmitting }: RecipeForm
             />
             
             <FormItem>
-              <FormLabel>Recipe Image</FormLabel>
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Recipe Image</label>
               <div className="flex items-center gap-4">
                 <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={isUploading} className="flex-1" />
                 {isUploading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
