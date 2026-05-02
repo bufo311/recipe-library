@@ -267,6 +267,44 @@ const LEAVENERS: Record<string, Record<string, number>> = {
   "pepper":        { tablespoon: 6, teaspoon: 2, tbsp: 6, tsp: 2 },
 };
 
+// ── Weight chart export ───────────────────────────────────────────────────
+
+export interface WeightChartEntry {
+  name: string;
+  category: string;
+  cup: number | null;
+  tbsp: number | null;
+  tsp: number | null;
+}
+
+export function getWeightChartData(): WeightChartEntry[] {
+  const categories: Array<{ label: string; data: Record<string, Record<string, number>> }> = [
+    { label: "Flours & Starches", data: FLOURS },
+    { label: "Sugars", data: SUGARS },
+    { label: "Fats & Oils", data: FATS },
+    { label: "Nut Butters & Spreads", data: SPREADS },
+    { label: "Dairy", data: DAIRY },
+    { label: "Syrups & Sweeteners", data: SYRUPS },
+    { label: "Liquids", data: LIQUIDS },
+    { label: "Chocolate & Cocoa", data: CHOCOLATE },
+    { label: "Oats & Grains", data: GRAINS },
+    { label: "Nuts", data: NUTS },
+    { label: "Dried Fruit", data: DRIED_FRUITS },
+    { label: "Produce", data: PRODUCE },
+    { label: "Pantry", data: PANTRY },
+    { label: "Leaveners & Spices", data: LEAVENERS },
+  ];
+  return categories.flatMap(({ label, data }) =>
+    Object.entries(data).map(([name, conversions]) => ({
+      name,
+      category: label,
+      cup: (conversions.cup as number) ?? null,
+      tbsp: (conversions.tbsp as number) ?? null,
+      tsp: (conversions.tsp as number) ?? null,
+    }))
+  );
+}
+
 // ── Merge all categories ─────────────────────────────────────────────────
 const GRAM_CONVERSIONS: Record<string, Record<string, number>> = {
   ...FLOURS,

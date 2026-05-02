@@ -1,9 +1,11 @@
 import { Link } from "wouter";
 import { BookOpen, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useLocation } from "wouter";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
+  const [location] = useLocation();
 
   return (
     <div className="min-h-[100dvh] flex flex-col selection:bg-primary/20 selection:text-primary">
@@ -14,6 +16,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <span className="font-serif font-medium text-lg tracking-wide">Recipe Archiver</span>
           </Link>
           <div className="flex items-center gap-4">
+            <Link
+              href="/reference"
+              className={`text-sm font-medium transition-colors ${location === "/reference" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Reference
+            </Link>
             <Link href="/recipe/new" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Write a Recipe
             </Link>

@@ -7,6 +7,7 @@ import Dashboard from "@/pages/dashboard";
 import RecipeDetail from "@/pages/recipe-detail";
 import RecipeNew from "@/pages/recipe-new";
 import RecipeEdit from "@/pages/recipe-edit";
+import Reference from "@/pages/reference";
 import LoginPage from "@/pages/login";
 import { AuthProvider, useAuth } from "@/lib/auth";
 
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/recipe/new" component={RecipeNew} />
       <Route path="/recipe/:id" component={RecipeDetail} />
       <Route path="/recipe/:id/edit" component={RecipeEdit} />
+      <Route path="/reference" component={Reference} />
       <Route component={NotFound} />
     </Switch>
   );
