@@ -157,6 +157,56 @@ export const WEIGHT_CHART: WeightCategory[] = [
 
 export const BUILTIN_SUBSTITUTIONS = [
   {
+    ingredient: "Allspice (1 tsp)",
+    substitute: "½ tsp cinnamon + ¼ tsp ginger + ¼ tsp cloves",
+    notes: null,
+  },
+  {
+    ingredient: "Baking powder (1 tsp)",
+    substitute: "¼ tsp baking soda + ½ tsp cream of tartar",
+    notes: null,
+  },
+  {
+    ingredient: "Baking soda (1 tsp)",
+    substitute: "4 tsp baking powder",
+    notes: "Only if the recipe has no acidic ingredients like buttermilk, yogurt, or citrus juice",
+  },
+  {
+    ingredient: "Beer (1 cup)",
+    substitute: "1 cup chicken or beef broth, or 1 cup nonalcoholic beer",
+    notes: null,
+  },
+  {
+    ingredient: "Bread crumbs (1 cup)",
+    substitute: "1 cup cracker crumbs, matzo meal, or ground oats",
+    notes: null,
+  },
+  {
+    ingredient: "Bread flour (1 cup)",
+    substitute: "1 cup all-purpose flour + 1 tsp vital wheat gluten",
+    notes: null,
+  },
+  {
+    ingredient: "Broth or stock (1 cup)",
+    substitute: "1 bouillon cube dissolved in 1 cup boiling water",
+    notes: null,
+  },
+  {
+    ingredient: "Brown sugar (1 cup)",
+    substitute: "1 cup granulated sugar + 1 tbsp molasses",
+    notes: "For dark brown sugar, use 2 tbsp molasses",
+  },
+  {
+    ingredient: "Butter, salted (1 cup)",
+    substitute: "⅞ cup vegetable oil + ½ tsp salt, or 1 cup shortening + ½ tsp salt",
+    notes: null,
+  },
+  {
+    ingredient: "Butter, unsalted (1 cup)",
+    substitute: "1 cup salted butter — reduce added salt by ½ tsp",
+    notes: null,
+  },
+  {
     ingredient: "Buttermilk (1 cup)",
     substitute: "1 cup milk + 1 tbsp lemon juice or white vinegar",
     notes: "Let sit 5 minutes until slightly curdled before using",
@@ -167,13 +217,33 @@ export const BUILTIN_SUBSTITUTIONS = [
     notes: "Sift together well",
   },
   {
-    ingredient: "Self-rising flour (1 cup)",
-    substitute: "1 cup all-purpose flour + 1½ tsp baking powder + ¼ tsp salt",
+    ingredient: "Chocolate, semisweet (1 oz)",
+    substitute: "1 oz unsweetened chocolate + 4 tsp granulated sugar",
     notes: null,
   },
   {
-    ingredient: "Baking powder (1 tsp)",
-    substitute: "¼ tsp baking soda + ½ tsp cream of tartar",
+    ingredient: "Chocolate, unsweetened (1 oz)",
+    substitute: "3 tbsp unsweetened cocoa powder + 1 tbsp vegetable oil or shortening",
+    notes: null,
+  },
+  {
+    ingredient: "Cocoa powder — natural vs. dutch-process",
+    substitute: "Swap 1:1 in most recipes",
+    notes: "Add ⅛ tsp baking soda per 3 tbsp when using natural in place of dutch-process",
+  },
+  {
+    ingredient: "Corn syrup (1 cup)",
+    substitute: "1¼ cup granulated sugar + ⅓ cup water, or 1 cup honey",
+    notes: null,
+  },
+  {
+    ingredient: "Cornstarch as thickener (1 tbsp)",
+    substitute: "2 tbsp all-purpose flour",
+    notes: "Flour needs longer cooking to lose raw taste",
+  },
+  {
+    ingredient: "Cream, half and half (1 cup)",
+    substitute: "⅞ cup milk + 1 tbsp butter",
     notes: null,
   },
   {
@@ -182,13 +252,118 @@ export const BUILTIN_SUBSTITUTIONS = [
     notes: "Use when stabilizing egg whites or preventing sugar crystallization",
   },
   {
-    ingredient: "Brown sugar (1 cup)",
-    substitute: "1 cup granulated sugar + 1 tbsp molasses",
-    notes: "For dark brown sugar, use 2 tbsp molasses",
+    ingredient: "Crème fraîche (1 cup)",
+    substitute: "1 cup heavy cream + 1 tbsp plain yogurt, stirred together",
+    notes: "Let stand at room temperature for 6 hours until thickened",
+  },
+  {
+    ingredient: "Egg (1 large)",
+    substitute: "3 tbsp aquafaba, or 1 tbsp ground flaxseed + 3 tbsp water",
+    notes: "Flax egg: let sit 5 minutes. Good in muffins, quick breads, cookies",
+  },
+  {
+    ingredient: "Fats for baking (1 cup)",
+    substitute: "1 cup unsweetened applesauce or fruit purée",
+    notes: "Reduces fat; may make baked goods denser and more moist",
+  },
+  {
+    ingredient: "Garlic (1 clove)",
+    substitute: "⅛ tsp garlic powder, or ½ tsp granulated garlic",
+    notes: null,
+  },
+  {
+    ingredient: "Gelatin (1 tbsp granulated)",
+    substitute: "2 tsp agar-agar",
+    notes: "Agar sets firmer than gelatin and works at room temperature",
+  },
+  {
+    ingredient: "Ginger, fresh (1 tsp minced)",
+    substitute: "½ tsp ground dried ginger",
+    notes: null,
+  },
+  {
+    ingredient: "Ginger, ground (1 tsp)",
+    substitute: "2 tsp fresh minced ginger",
+    notes: null,
+  },
+  {
+    ingredient: "Heavy cream (1 cup, for cooking)",
+    substitute: "⅔ cup whole milk + ⅓ cup melted butter",
+    notes: "Won't whip; good for sauces and baking",
+  },
+  {
+    ingredient: "Herbs, fresh (1 tbsp chopped)",
+    substitute: "1 tsp dried herbs (crumbled)",
+    notes: null,
+  },
+  {
+    ingredient: "Honey (1 cup)",
+    substitute: "1¼ cup granulated sugar + ¼ cup water",
+    notes: "Reduce oven temp by 25°F; expect slightly different texture",
+  },
+  {
+    ingredient: "Hot pepper sauce (1 tsp)",
+    substitute: "¾ tsp cayenne pepper + 1 tsp vinegar",
+    notes: null,
+  },
+  {
+    ingredient: "Lard (1 cup)",
+    substitute: "1 cup shortening, or 1 cup butter",
+    notes: null,
+  },
+  {
+    ingredient: "Lemon juice (1 tsp)",
+    substitute: "1 tsp lime juice, or ½ tsp white vinegar",
+    notes: null,
+  },
+  {
+    ingredient: "Lemon zest (1 tsp)",
+    substitute: "½ tsp lemon extract, or 2 tbsp fresh lemon juice",
+    notes: null,
+  },
+  {
+    ingredient: "Mace (1 tsp)",
+    substitute: "1 tsp nutmeg",
+    notes: null,
+  },
+  {
+    ingredient: "Mayonnaise (1 cup)",
+    substitute: "1 cup sour cream or 1 cup plain yogurt",
+    notes: null,
+  },
+  {
+    ingredient: "Molasses (1 cup)",
+    substitute: "¾ cup brown sugar + 1 tsp cream of tartar",
+    notes: null,
+  },
+  {
+    ingredient: "Mustard, prepared (1 tbsp)",
+    substitute: "1 tbsp dry mustard + 1 tsp water + 1 tsp vinegar + 1 tsp sugar, mixed",
+    notes: null,
   },
   {
     ingredient: "Powdered sugar (1 cup)",
     substitute: "1 cup granulated sugar + 1 tbsp cornstarch, blended until fine",
+    notes: null,
+  },
+  {
+    ingredient: "Ricotta (1 cup)",
+    substitute: "1 cup dry cottage cheese, or 1 cup silken tofu (blended smooth)",
+    notes: null,
+  },
+  {
+    ingredient: "Saffron (¼ tsp)",
+    substitute: "¼ tsp turmeric",
+    notes: "Adds color but a different flavor; works best in savory dishes",
+  },
+  {
+    ingredient: "Self-rising flour (1 cup)",
+    substitute: "1 cup all-purpose flour + 1½ tsp baking powder + ¼ tsp salt",
+    notes: null,
+  },
+  {
+    ingredient: "Shortening (1 cup)",
+    substitute: "1 cup butter (reduce added salt in recipe by ½ tsp)",
     notes: null,
   },
   {
@@ -197,34 +372,14 @@ export const BUILTIN_SUBSTITUTIONS = [
     notes: "Works well in baked goods, dips, and sauces",
   },
   {
-    ingredient: "Heavy cream (1 cup, for cooking)",
-    substitute: "⅔ cup whole milk + ⅓ cup melted butter",
-    notes: "Won't whip; good for sauces and baking",
-  },
-  {
-    ingredient: "Whole milk (1 cup)",
-    substitute: "½ cup evaporated milk + ½ cup water",
-    notes: "Or substitute any non-dairy milk 1:1",
-  },
-  {
-    ingredient: "Egg (1 large)",
-    substitute: "3 tbsp aquafaba, or 1 tbsp ground flaxseed + 3 tbsp water",
-    notes: "Flax egg: let sit 5 minutes. Good in muffins, quick breads, cookies",
-  },
-  {
-    ingredient: "Honey (1 cup)",
-    substitute: "1¼ cup granulated sugar + ¼ cup water",
-    notes: "Reduce oven temp by 25°F; expect slightly different texture",
-  },
-  {
-    ingredient: "Vegetable oil (1 cup)",
-    substitute: "1 cup melted butter or melted coconut oil",
-    notes: "Butter adds richness; coconut oil may add subtle flavor",
-  },
-  {
-    ingredient: "Unsalted butter (1 cup)",
-    substitute: "1 cup salted butter — reduce added salt by ½ tsp",
+    ingredient: "Soy sauce (½ cup)",
+    substitute: "¼ cup Worcestershire sauce mixed with 1 tbsp water",
     notes: null,
+  },
+  {
+    ingredient: "Sweetened condensed milk (14 oz can)",
+    substitute: "¾ cup white sugar + ½ cup water + 1⅛ cups dry powdered milk",
+    notes: "Combine and cook over medium heat, stirring, until thickened (~20 min)",
   },
   {
     ingredient: "Vanilla extract (1 tsp)",
@@ -232,13 +387,33 @@ export const BUILTIN_SUBSTITUTIONS = [
     notes: "Or 1 tsp vanilla powder",
   },
   {
-    ingredient: "Cornstarch as thickener (1 tbsp)",
-    substitute: "2 tbsp all-purpose flour",
-    notes: "Flour needs longer cooking to lose raw taste",
+    ingredient: "Vegetable oil (1 cup)",
+    substitute: "1 cup melted butter or melted coconut oil",
+    notes: "Butter adds richness; coconut oil may add subtle flavor",
   },
   {
-    ingredient: "Cocoa powder — natural vs. dutch-process",
-    substitute: "Swap 1:1 in most recipes",
-    notes: "Add ⅛ tsp baking soda per 3 tbsp when using natural in place of dutch-process",
+    ingredient: "White sugar (1 cup)",
+    substitute: "1 cup brown sugar, or ¾ cup honey (reduce liquid in recipe by ¼ cup)",
+    notes: null,
+  },
+  {
+    ingredient: "Whole milk (1 cup)",
+    substitute: "½ cup evaporated milk + ½ cup water, or any non-dairy milk 1:1",
+    notes: null,
+  },
+  {
+    ingredient: "Wine (1 cup)",
+    substitute: "1 cup chicken or beef broth, or 1 cup fruit juice + 2 tsp vinegar",
+    notes: null,
+  },
+  {
+    ingredient: "Yeast, active dry (1 packet / 2¼ tsp)",
+    substitute: "2¼ tsp instant or rapid-rise yeast",
+    notes: "Instant yeast can be mixed directly into dry ingredients without proofing",
+  },
+  {
+    ingredient: "Yogurt (1 cup)",
+    substitute: "1 cup sour cream or 1 cup buttermilk",
+    notes: null,
   },
 ];
