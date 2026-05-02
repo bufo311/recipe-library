@@ -156,6 +156,272 @@ function extractFromJsonLd(recipe: any, url: string): ScrapedRecipe {
   return { title, sourceUrl: url, ingredients, instructions, imagePath, yields, totalTime, prepTime, cookTime, course, cuisine, attribute };
 }
 
+// ── helpers ────────────────────────────────────────────────────────────────
+
+function elText(el: Element): string {
+  return (el.textContent ?? "").replace(/\s+/g, " ").trim();
+}
+
+function listItemTexts(container: Element): string[] {
+  return Array.from(container.querySelectorAll("li"))
+    .map(elText)
+    .filter((t) => t.length > 1);
+}
+
+function firstImageSrc(doc: Document): string | null {
+  const og = doc.querySelector('meta[property="og:image"]');
+  if (og) return og.getAttribute("content");
+  const img = doc.querySelector("article img, .post-content img, main img");
+  return img?.getAttribute("src") ?? null;
+}
+
+function pageTitle(doc: Document): string {
+  const og = doc.querySelector('meta[property="og:title"]');
+  if (og) {
+    const t = (og.getAttribute("content") ?? "").replace(/\s*[-|–]\s*.+$/, "").trim();
+    if (t) return t;
+  }
+  return (doc.querySelector("h1")?.textContent ?? "").replace(/\s+/g, " ").trim() || "Untitled Recipe";
+}
+
+// ── Strategy 1: microdata (itemprop) ──────────────────────────────────────
+
+function extractFromMicrodata(doc: Document, url: string): ScrapedRecipe | null {
+  const recipeEl = doc.querySelector(
+    '[itemtype*="schema.org/Recipe"], [itemtype*="Schema.org/Recipe"]'
+  );
+  if (!recipeEl) return null;
+
+  const nameEl = recipeEl.querySelector('[itemprop="name"]');
+  const title = nameEl ? elText(nameEl) : pageTitle(doc);
+
+  const ingredients = Array.from(recipeEl.querySelectorAll('[itemprop="recipeIngredient"], [itemprop="ingredients"]'))
+    .map(elText)
+    .filter(Boolean);
+
+  const instructionEls = Array.from(recipeEl.querySelectorAll('[itemprop="recipeInstructions"]'));
+  const instructions: string[] = [];
+  for (const el of instructionEls) {
+    const steps = Array.from(el.querySelectorAll('[itemprop="text"], li'));
+    if (steps.length > 0) {
+      steps.map(elText).filter(Boolean).forEach((s) => instructions.push(s));
+    } else {
+      const t = elText(el);
+      if (t) instructions.push(...t.split(/\n+/).map((s) => s.trim()).filter(Boolean));
+    }
+  }
+
+  if (ingredients.length === 0 && instructions.length === 0) return null;
+
+  const imagePath = getImage(
+    recipeEl.querySelector('[itemprop="image"]')?.getAttribute("src") ??
+    recipeEl.querySelector('[itemprop="image"]')?.getAttribute("content") ??
+    firstImageSrc(doc)
+  );
+
+  const searchText = [title, ...ingredients].join(" ");
+  return {
+    title, sourceUrl: url, ingredients, instructions, imagePath,
+    yields: elText(recipeEl.querySelector('[itemprop="recipeYield"]') ?? document.createElement("span")) || null,
+    totalTime: null, prepTime: null, cookTime: null,
+    course: guessFromText(searchText, COURSE_MAP),
+    cuisine: guessFromText(searchText, CUISINE_MAP),
+    attribute: guessAttributes(searchText),
+  };
+}
+
+// ── Strategy 2: known recipe-plugin CSS classes ────────────────────────────
+
+const PLUGIN_SELECTORS = {
+  // WP Recipe Maker
+  wprm: {
+    root: ".wprm-recipe-container, .wprm-recipe",
+    title: ".wprm-recipe-name",
+    ingredient: ".wprm-recipe-ingredient",
+    instruction: ".wprm-recipe-instruction-text",
+    yields: ".wprm-recipe-servings-with-unit",
+    image: ".wprm-recipe-image img",
+  },
+  // Tasty Recipes
+  tasty: {
+    root: ".tasty-recipes",
+    title: ".tasty-recipes-title",
+    ingredient: ".tasty-recipes-ingredients li",
+    instruction: ".tasty-recipes-instructions li",
+    yields: ".tasty-recipes-yield",
+    image: ".tasty-recipes-image img",
+  },
+  // Create by Mediavine
+  mv: {
+    root: ".mv-create-card, .mv-recipe",
+    title: ".mv-create-title",
+    ingredient: ".mv-create-ingredients li",
+    instruction: ".mv-create-instructions li",
+    yields: ".mv-create-yield",
+    image: ".mv-create-image img",
+  },
+  // Delicious Recipes / Cooked
+  delicious: {
+    root: ".dr-recipe, .cooked-recipe",
+    title: ".dr-recipe-title, .cooked-recipe-title",
+    ingredient: ".dr-ingredient, .ingredient",
+    instruction: ".dr-step, .step",
+    yields: ".dr-yield",
+    image: ".dr-recipe-image img, .cooked-recipe-image img",
+  },
+  // EasyRecipe
+  easy: {
+    root: ".easyrecipe, .ERSContainer",
+    title: ".ERSName",
+    ingredient: ".ERSIngredient",
+    instruction: ".ERSInstructions li",
+    yields: ".ERSServes",
+    image: ".ERSImage img",
+  },
+  // Zip Recipes / BigOven
+  zip: {
+    root: ".zrdn-recipe-container, .bigoven-recipe",
+    title: ".zrdn-recipe-title",
+    ingredient: ".zrdn-ingredient, .zrdn-ingredients li",
+    instruction: ".zrdn-instruction, .zrdn-instructions li",
+    yields: ".zrdn-yield",
+    image: ".zrdn-image img",
+  },
+  // Simply Recipes / The Spruce Eats custom card
+  spruce: {
+    root: ".structured-content-recipe, .recipe-block",
+    title: ".recipe-block__title, .structured-content-recipe__title",
+    ingredient: ".structured-content-recipe__ingredient, .recipe-block__ingredient",
+    instruction: ".structured-content-recipe__step, .recipe-block__step",
+    yields: ".recipe-block__servings",
+    image: ".recipe-block__image img",
+  },
+  // Generic / fallback classes that many themes use
+  generic: {
+    root: ".recipe-card, .recipe-container, .recipe-box, #recipe",
+    title: ".recipe-title, .recipe-name, h2.recipe, h3.recipe",
+    ingredient: ".recipe-ingredients li, .ingredients li, .ingredient-list li",
+    instruction: ".recipe-instructions li, .instructions li, .directions li, .steps li",
+    yields: ".recipe-servings, .recipe-yield",
+    image: ".recipe-image img, .recipe-photo img",
+  },
+};
+
+function extractFromPlugin(doc: Document, url: string): ScrapedRecipe | null {
+  for (const sel of Object.values(PLUGIN_SELECTORS)) {
+    const root = doc.querySelector(sel.root);
+    if (!root) continue;
+
+    const ingredients = Array.from(root.querySelectorAll(sel.ingredient)).map(elText).filter(Boolean);
+    const instructions = Array.from(root.querySelectorAll(sel.instruction)).map(elText).filter(Boolean);
+    if (ingredients.length === 0 && instructions.length === 0) continue;
+
+    const titleEl = root.querySelector(sel.title);
+    const title = titleEl ? elText(titleEl) : pageTitle(doc);
+    const imgEl = root.querySelector(sel.image);
+    const imagePath = imgEl?.getAttribute("src") ?? imgEl?.getAttribute("data-src") ?? firstImageSrc(doc);
+    const yieldsEl = root.querySelector(sel.yields);
+    const yields = yieldsEl ? elText(yieldsEl) : null;
+
+    const searchText = [title, ...ingredients].join(" ");
+    return {
+      title, sourceUrl: url, ingredients, instructions, imagePath: imagePath ?? null, yields,
+      totalTime: null, prepTime: null, cookTime: null,
+      course: guessFromText(searchText, COURSE_MAP),
+      cuisine: guessFromText(searchText, CUISINE_MAP),
+      attribute: guessAttributes(searchText),
+    };
+  }
+  return null;
+}
+
+// ── Strategy 3: heading-based heuristic ───────────────────────────────────
+
+function extractFromHeadings(doc: Document, url: string): ScrapedRecipe | null {
+  const ingredientRe = /^ingredients?$/i;
+  const instructionRe = /^(instructions?|directions?|steps?|method|preparation|how to make)$/i;
+
+  // Gather all block-level headings and labelled sections
+  const allHeadings = Array.from(
+    doc.querySelectorAll("h1,h2,h3,h4,h5,h6,dt,th,[class*='heading'],[class*='title'],[class*='label']")
+  );
+
+  let ingredientsContainer: Element | null = null;
+  let instructionsContainer: Element | null = null;
+
+  for (const heading of allHeadings) {
+    const text = elText(heading).replace(/[:\s]+$/, "");
+    if (ingredientRe.test(text)) {
+      ingredientsContainer = findNextList(heading);
+    }
+    if (instructionRe.test(text)) {
+      instructionsContainer = findNextList(heading);
+    }
+  }
+
+  // Also try searching for any element whose visible text is exactly "Ingredients" etc.
+  if (!ingredientsContainer || !instructionsContainer) {
+    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT);
+    let node: Element | null;
+    while ((node = walker.nextNode() as Element | null)) {
+      const tag = node.tagName.toLowerCase();
+      if (["script","style","noscript","svg","button","a","nav","footer","header"].includes(tag)) continue;
+      // Only look at leaf-ish nodes (few children)
+      if (node.children.length > 3) continue;
+      const text = elText(node).replace(/[:\s]+$/, "");
+      if (!ingredientsContainer && ingredientRe.test(text)) {
+        ingredientsContainer = findNextList(node);
+      }
+      if (!instructionsContainer && instructionRe.test(text)) {
+        instructionsContainer = findNextList(node);
+      }
+    }
+  }
+
+  const ingredients = ingredientsContainer ? listItemTexts(ingredientsContainer) : [];
+  const instructions = instructionsContainer ? listItemTexts(instructionsContainer) : [];
+
+  if (ingredients.length < 2 && instructions.length < 2) return null;
+
+  const title = pageTitle(doc);
+  const imagePath = firstImageSrc(doc);
+  const searchText = [title, ...ingredients].join(" ");
+  return {
+    title, sourceUrl: url, ingredients, instructions, imagePath, yields: null,
+    totalTime: null, prepTime: null, cookTime: null,
+    course: guessFromText(searchText, COURSE_MAP),
+    cuisine: guessFromText(searchText, CUISINE_MAP),
+    attribute: guessAttributes(searchText),
+  };
+}
+
+function findNextList(el: Element): Element | null {
+  // Look for the next ul/ol sibling, or the first ul/ol in a following sibling container
+  let cursor: Element | null = el.nextElementSibling;
+  for (let i = 0; i < 5 && cursor; i++) {
+    if (cursor.tagName === "UL" || cursor.tagName === "OL") return cursor;
+    const inner = cursor.querySelector("ul, ol");
+    if (inner) return inner;
+    cursor = cursor.nextElementSibling;
+  }
+  // Try going up one level and searching siblings from there
+  const parent = el.parentElement;
+  if (parent) {
+    let found = false;
+    for (const child of Array.from(parent.children)) {
+      if (found) {
+        if (child.tagName === "UL" || child.tagName === "OL") return child;
+        const inner = child.querySelector("ul, ol");
+        if (inner) return inner;
+      }
+      if (child === el) found = true;
+    }
+  }
+  return null;
+}
+
+// ── fetch + orchestrate ───────────────────────────────────────────────────
+
 async function fetchHtml(url: string): Promise<string> {
   for (const makeProxy of CORS_PROXIES) {
     try {
@@ -171,22 +437,16 @@ async function fetchHtml(url: string): Promise<string> {
   throw new Error("Could not fetch that page. The site may be blocking external requests.");
 }
 
-function findRecipeInJsonLd(html: string, url: string): ScrapedRecipe | null {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
+function findRecipeInJsonLd(doc: Document, url: string): ScrapedRecipe | null {
   const scripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
-
   for (const script of scripts) {
     try {
       const json = JSON.parse(script.textContent ?? "");
       const candidates: unknown[] = Array.isArray(json) ? json : [json];
-
       for (const item of candidates) {
         if (typeof item !== "object" || item === null) continue;
         const obj = item as Record<string, unknown>;
-
         if (obj["@type"] === "Recipe") return extractFromJsonLd(obj, url);
-
         if (obj["@graph"] && Array.isArray(obj["@graph"])) {
           const recipeNode = obj["@graph"].find(
             (n: unknown) => typeof n === "object" && n !== null && (n as Record<string, unknown>)["@type"] === "Recipe"
@@ -203,12 +463,20 @@ function findRecipeInJsonLd(html: string, url: string): ScrapedRecipe | null {
 
 export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipe> {
   const html = await fetchHtml(url);
-  const recipe = findRecipeInJsonLd(html, url);
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  const recipe =
+    findRecipeInJsonLd(doc, url) ??
+    extractFromMicrodata(doc, url) ??
+    extractFromPlugin(doc, url) ??
+    extractFromHeadings(doc, url);
 
   if (recipe) return recipe;
 
   throw new Error(
-    "This site doesn't include machine-readable recipe data, so it can't be imported automatically. " +
-    "Try copying the ingredients and instructions manually, or use a site like AllRecipes, Food Network, NYT Cooking, or Serious Eats."
+    "Couldn't automatically extract a recipe from this page. " +
+    "The site may load content dynamically or use an unusual layout. " +
+    "Try pasting the ingredients and instructions manually."
   );
 }
