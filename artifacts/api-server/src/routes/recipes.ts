@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { eq, desc, count, sql, ilike, or, and } from "drizzle-orm";
+import { eq, desc, count, sql, ilike, and } from "drizzle-orm";
 import { db, recipesTable } from "@workspace/db";
 import {
   CreateRecipeBody,
@@ -14,27 +14,14 @@ import {
 } from "@workspace/api-zod";
 import { scrapeRecipeFromUrl } from "../lib/recipeScraper";
 import { convertIngredientToGrams } from "../lib/gramConverter";
+import { getSupabaseClient, STORAGE_BUCKET } from "../lib/supabase";
 import multer from "multer";
 import path from "path";
-import fs from "fs";
 
 const router = Router();
 
-const uploadsDir = path.join(process.cwd(), "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
-  },
-});
-
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith("image/")) {
@@ -386,25 +373,39 @@ router.post("/recipes/:id/convert-to-grams", async (req, res) => {
   }
 });
 
-router.post("/uploads", upload.single("image"), (req, res) => {
+router.post("/uploads", upload.single("image"), async (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: "No image file uploaded" });
     return;
   }
-  const url = `/api/uploads/${req.file.filename}`;
-  res.json({ url });
-});
 
-router.get("/uploads/:filename", (req, res) => {
-  const filename = path.basename(req.params.filename);
-  const filePath = path.join(uploadsDir, filename);
+  try {
+    const supabase = getSupabaseClient();
+    const ext = path.extname(req.file.originalname) || ".jpg";
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
 
-  if (!fs.existsSync(filePath)) {
-    res.status(404).json({ error: "File not found" });
-    return;
+    const { error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filename, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: false,
+      });
+
+    if (error) {
+      req.log.error({ err: error }, "Supabase Storage upload failed");
+      res.status(500).json({ error: "Image upload failed" });
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(STORAGE_BUCKET)
+      .getPublicUrl(filename);
+
+    res.json({ url: publicUrlData.publicUrl });
+  } catch (err) {
+    req.log.error({ err }, "Image upload error");
+    res.status(500).json({ error: "Image upload failed" });
   }
-
-  res.sendFile(filePath);
 });
 
 function serializeRecipe(recipe: typeof recipesTable.$inferSelect) {
