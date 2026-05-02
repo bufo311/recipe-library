@@ -522,22 +522,66 @@ function findRecipeInJsonLd(doc: Document, url: string): ScrapedRecipe | null {
   return null;
 }
 
+const SCRAPE_API_URL = import.meta.env.VITE_SCRAPE_API_URL as string | undefined;
+
+async function scrapeViaApi(url: string): Promise<ScrapedRecipe | null> {
+  if (!SCRAPE_API_URL) return null;
+  try {
+    const resp = await fetch(`${SCRAPE_API_URL}/api/recipes/scrape`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data.title) return null;
+    // Map API response shape → ScrapedRecipe
+    return {
+      title: data.title,
+      sourceUrl: data.sourceUrl ?? url,
+      ingredients: data.ingredients ?? [],
+      instructions: data.instructions ?? [],
+      imagePath: data.imagePath ?? null,
+      yields: data.yields ?? null,
+      totalTime: data.totalTime ?? null,
+      prepTime: data.prepTime ?? null,
+      cookTime: data.cookTime ?? null,
+      course: data.course ?? null,
+      cuisine: data.cuisine ?? null,
+      attribute: data.attribute ?? [],
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipe> {
-  const html = await fetchHtml(url);
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
+  // 1. Try CORS proxies + local HTML parsing
+  let html: string | null = null;
+  try {
+    html = await fetchHtml(url);
+  } catch {
+    // proxies failed — fall through to API
+  }
 
-  const recipe =
-    findRecipeInJsonLd(doc, url) ??
-    extractFromMicrodata(doc, url) ??
-    extractFromPlugin(doc, url) ??
-    extractFromHeadings(doc, url);
+  if (html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const recipe =
+      findRecipeInJsonLd(doc, url) ??
+      extractFromMicrodata(doc, url) ??
+      extractFromPlugin(doc, url) ??
+      extractFromHeadings(doc, url);
+    if (recipe) return recipe;
+  }
 
-  if (recipe) return recipe;
+  // 2. Fall back to the Replit API server (handles sites that block CORS proxies)
+  const apiResult = await scrapeViaApi(url);
+  if (apiResult) return apiResult;
 
   throw new Error(
     "Couldn't automatically extract a recipe from this page. " +
-    "The site may load content dynamically or use an unusual layout. " +
+    "The site may block automated access or load content dynamically. " +
     "Try pasting the ingredients and instructions manually."
   );
 }
