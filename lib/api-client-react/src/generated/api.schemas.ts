@@ -56,6 +56,9 @@ export interface ScrapedRecipe {
   totalTime?: string | null;
   prepTime?: string | null;
   cookTime?: string | null;
+  course?: string | null;
+  cuisine?: string | null;
+  attribute: string[];
 }
 
 export interface CreateRecipeBody {

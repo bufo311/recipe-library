@@ -83,6 +83,9 @@ export const ScrapeRecipeResponse = zod.object({
   totalTime: zod.string().nullish(),
   prepTime: zod.string().nullish(),
   cookTime: zod.string().nullish(),
+  course: zod.string().nullish(),
+  cuisine: zod.string().nullish(),
+  attribute: zod.array(zod.string()),
 });
 
 /**

@@ -409,11 +409,22 @@ components:
         cookTime:
           type: string
           nullable: true
+        course:
+          type: string
+          nullable: true
+        cuisine:
+          type: string
+          nullable: true
+        attribute:
+          type: array
+          items:
+            type: string
       required:
         - title
         - sourceUrl
         - ingredients
         - instructions
+        - attribute
 
     CreateRecipeBody:
       type: object

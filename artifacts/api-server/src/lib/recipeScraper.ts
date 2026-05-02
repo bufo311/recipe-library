@@ -8,6 +8,9 @@ export interface ScrapedRecipeData {
   totalTime: string | null;
   prepTime: string | null;
   cookTime: string | null;
+  course: string | null;
+  cuisine: string | null;
+  attribute: string[];
 }
 
 function formatMinutes(minutes: number | null | undefined): string | null {
@@ -28,6 +31,127 @@ function parseInstructionsFromText(text: string): string[] {
     .map((l) => l.trim())
     .filter(Boolean);
   return lines.length > 0 ? lines : [text];
+}
+
+function toStringArray(val: unknown): string[] {
+  if (!val) return [];
+  if (typeof val === "string") return val.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
+  if (Array.isArray(val)) return val.filter((v) => typeof v === "string").map((v) => (v as string).trim());
+  return [];
+}
+
+const COURSE_MAP: [string, RegExp][] = [
+  ["Breakfast", /\b(breakfast|brunch|morning)\b/i],
+  ["Lunch",     /\b(lunch|sandwich|wrap)\b/i],
+  ["Dinner",    /\b(dinner|main\s*course|main\s*dish|entr[ée]e?|supper)\b/i],
+  ["Dessert",   /\b(dessert|sweets?|cake|cookie|pie|pudding|ice\s*cream|brownie|biscuit)\b/i],
+  ["Snack",     /\b(snack|appetizer|starter|finger\s*food|dip)\b/i],
+  ["Drink",     /\b(drink|beverage|cocktail|smoothie|juice|shake)\b/i],
+  ["Side",      /\b(side\s*dish|side|accompaniment|garnish)\b/i],
+  ["Soup",      /\b(soup|stew|chowder|bisque|broth)\b/i],
+  ["Salad",     /\b(salad)\b/i],
+];
+
+const CUISINE_MAP: [string, RegExp][] = [
+  ["Italian",       /\b(italian|pasta|pizza|risotto|tiramisu|carbonara|bolognese|pesto|gnocchi|lasagna|gelato)\b/i],
+  ["Mexican",       /\b(mexican|taco|burrito|enchilada|guacamole|salsa|quesadilla|tamale|chile|fajita)\b/i],
+  ["American",      /\b(american|bbq|barbecue|burger|mac\s*and\s*cheese|southern|tex.mex|comfort\s*food)\b/i],
+  ["Chinese",       /\b(chinese|stir.fry|dim\s*sum|fried\s*rice|dumpling|wonton|lo\s*mein)\b/i],
+  ["Indian",        /\b(indian|curry|masala|tikka|biryani|naan|dal|chutney|samosa)\b/i],
+  ["French",        /\b(french|croissant|baguette|ratatouille|cr[êe]pe|quiche|beurre|coq\s*au\s*vin)\b/i],
+  ["Japanese",      /\b(japanese|sushi|ramen|tempura|teriyaki|miso|udon|soba|okonomiyaki)\b/i],
+  ["Thai",          /\b(thai|pad\s*thai|green\s*curry|tom\s*yum|satay|larb)\b/i],
+  ["Greek",         /\b(greek|mediterranean|hummus|falafel|tzatziki|souvlaki|moussaka|pita)\b/i],
+  ["Korean",        /\b(korean|kimchi|bibimbap|bulgogi|tteok|gochujang)\b/i],
+  ["Spanish",       /\b(spanish|paella|tapas|gazpacho|churro|tortilla\s*espa[ñn]ola)\b/i],
+  ["Middle Eastern",/\b(middle\s*eastern|lebanese|persian|turkish|shawarma|kebab|baklava|za.atar)\b/i],
+];
+
+const DIET_SCHEMA_MAP: Record<string, string> = {
+  "VeganDiet":       "Vegan",
+  "VegetarianDiet":  "Vegetarian",
+  "GlutenFreeDiet":  "Gluten-Free",
+  "DiabeticDiet":    "Diabetic-Friendly",
+  "HalalDiet":       "Halal",
+  "KosherDiet":      "Kosher",
+  "LowCalorieDiet":  "Low-Calorie",
+  "LowFatDiet":      "Low-Fat",
+  "LowSaltDiet":     "Low-Sodium",
+};
+
+const ATTRIBUTE_KEYWORD_MAP: [string, RegExp][] = [
+  ["Quick",       /\b(quick|fast|30[\s-]min(?:ute)?|under\s*30|easy\s*weeknight)\b/i],
+  ["Vegetarian",  /\b(vegetarian)\b/i],
+  ["Vegan",       /\b(vegan)\b/i],
+  ["Gluten-Free", /\b(gluten.?free)\b/i],
+  ["Dairy-Free",  /\b(dairy.?free|non-dairy)\b/i],
+  ["Healthy",     /\b(healthy|light|low.calorie|nutritious|wholesome)\b/i],
+  ["One-Pot",     /\b(one.?pot|one.?pan|sheet.?pan|skillet)\b/i],
+  ["Make-Ahead",  /\b(make.?ahead|prep.?ahead|meal.?prep)\b/i],
+  ["Fermentation",/\b(ferment|sourdough|kimchi|kombucha|kefir)\b/i],
+  ["Slow-Cooker", /\b(slow.?cooker|crock.?pot)\b/i],
+  ["Instant-Pot", /\b(instant\s*pot|pressure\s*cook)\b/i],
+  ["Kid-Friendly",/\b(kid.?friendly|family.?friendly|kid\s*approved)\b/i],
+];
+
+function guessFacets(opts: {
+  title: string;
+  recipeCategory: string[];
+  recipeCuisine: string[];
+  keywords: string[];
+  suitableForDiet: string[];
+  totalTime: string | null;
+}): { course: string | null; cuisine: string | null; attribute: string[] } {
+  const { recipeCategory, recipeCuisine, keywords, suitableForDiet, totalTime, title } = opts;
+
+  const categoryText = [...recipeCategory, ...keywords, title].join(" ");
+  const cuisineText  = [...recipeCuisine, ...keywords, title].join(" ");
+  const attrText     = [...keywords, title].join(" ");
+
+  let course: string | null = null;
+  if (recipeCategory.length > 0) {
+    for (const [name, pattern] of COURSE_MAP) {
+      if (recipeCategory.some((c) => pattern.test(c))) { course = name; break; }
+    }
+  }
+  if (!course) {
+    for (const [name, pattern] of COURSE_MAP) {
+      if (pattern.test(categoryText)) { course = name; break; }
+    }
+  }
+
+  let cuisine: string | null = null;
+  if (recipeCuisine.length > 0) {
+    for (const [name, pattern] of CUISINE_MAP) {
+      if (recipeCuisine.some((c) => pattern.test(c))) { cuisine = name; break; }
+    }
+  }
+  if (!cuisine) {
+    for (const [name, pattern] of CUISINE_MAP) {
+      if (pattern.test(cuisineText)) { cuisine = name; break; }
+    }
+  }
+
+  const attributeSet = new Set<string>();
+
+  for (const dietUrl of suitableForDiet) {
+    const key = dietUrl.replace(/.*\//, "");
+    if (DIET_SCHEMA_MAP[key]) attributeSet.add(DIET_SCHEMA_MAP[key]);
+  }
+
+  if (totalTime) {
+    const minMatch = totalTime.match(/(\d+)\s*min/i);
+    const hrMatch  = totalTime.match(/(\d+)\s*hr/i);
+    const totalMinutes = (hrMatch ? parseInt(hrMatch[1]) * 60 : 0) + (minMatch ? parseInt(minMatch[1]) : 0);
+    if (totalMinutes > 0 && totalMinutes <= 30) attributeSet.add("Quick");
+  }
+
+  for (const [attr, pattern] of ATTRIBUTE_KEYWORD_MAP) {
+    if (attr === "Quick" && attributeSet.has("Quick")) continue;
+    if (pattern.test(attrText)) attributeSet.add(attr);
+  }
+
+  return { course, cuisine, attribute: [...attributeSet] };
 }
 
 export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipeData> {
@@ -52,7 +176,6 @@ export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipeDat
       try {
         const jsonContent = scriptTag.replace(/<script[^>]*>/i, "").replace(/<\/script>/i, "");
         const parsed = JSON.parse(jsonContent);
-
         const recipes = findRecipes(parsed);
         for (const recipe of recipes) {
           const result = extractFromJsonLd(recipe, url);
@@ -76,6 +199,14 @@ export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipeDat
   }
 
   const image = extractImageFromHtml(html);
+  const { course, cuisine, attribute } = guessFacets({
+    title,
+    recipeCategory: [],
+    recipeCuisine: [],
+    keywords: extractKeywordsFromHtml(html),
+    suitableForDiet: [],
+    totalTime: null,
+  });
 
   return {
     title,
@@ -87,23 +218,20 @@ export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipeDat
     totalTime: null,
     prepTime: null,
     cookTime: null,
+    course,
+    cuisine,
+    attribute,
   };
 }
 
 function findRecipes(data: unknown): unknown[] {
   if (!data) return [];
-  if (Array.isArray(data)) {
-    return data.flatMap(findRecipes);
-  }
+  if (Array.isArray(data)) return data.flatMap(findRecipes);
   if (typeof data === "object" && data !== null) {
     const obj = data as Record<string, unknown>;
     const type = obj["@type"];
-    if (type === "Recipe" || (Array.isArray(type) && type.includes("Recipe"))) {
-      return [data];
-    }
-    if (obj["@graph"]) {
-      return findRecipes(obj["@graph"]);
-    }
+    if (type === "Recipe" || (Array.isArray(type) && type.includes("Recipe"))) return [data];
+    if (obj["@graph"]) return findRecipes(obj["@graph"]);
     return Object.values(obj).flatMap(findRecipes);
   }
   return [];
@@ -144,7 +272,7 @@ function extractFromJsonLd(recipe: unknown, url: string): ScrapedRecipeData | nu
     image = r.image;
   } else if (Array.isArray(r.image) && r.image.length > 0) {
     const first = r.image[0];
-    image = typeof first === "string" ? first : (first as Record<string, unknown>)?.url as string ?? null;
+    image = typeof first === "string" ? first : ((first as Record<string, unknown>)?.url as string ?? null);
   } else if (r.image && typeof r.image === "object") {
     image = (r.image as Record<string, unknown>).url as string ?? null;
   }
@@ -156,8 +284,22 @@ function extractFromJsonLd(recipe: unknown, url: string): ScrapedRecipeData | nu
       : null;
 
   const totalTime = parseDuration(r.totalTime as string | null);
-  const prepTime = parseDuration(r.prepTime as string | null);
-  const cookTime = parseDuration(r.cookTime as string | null);
+  const prepTime  = parseDuration(r.prepTime as string | null);
+  const cookTime  = parseDuration(r.cookTime as string | null);
+
+  const recipeCategory = toStringArray(r.recipeCategory);
+  const recipeCuisine  = toStringArray(r.recipeCuisine);
+  const keywords       = toStringArray(r.keywords);
+  const suitableForDiet = toStringArray(r.suitableForDiet);
+
+  const { course, cuisine, attribute } = guessFacets({
+    title,
+    recipeCategory,
+    recipeCuisine,
+    keywords,
+    suitableForDiet,
+    totalTime,
+  });
 
   return {
     title,
@@ -169,6 +311,9 @@ function extractFromJsonLd(recipe: unknown, url: string): ScrapedRecipeData | nu
     totalTime,
     prepTime,
     cookTime,
+    course,
+    cuisine,
+    attribute,
   };
 }
 
@@ -197,12 +342,17 @@ function extractImageFromHtml(html: string): string | null {
   return null;
 }
 
+function extractKeywordsFromHtml(html: string): string[] {
+  const meta = html.match(/<meta[^>]+name=["']keywords["'][^>]+content=["']([^"']+)["']/i);
+  if (meta) return meta[1].split(/[,;]/).map((s) => s.trim()).filter(Boolean);
+  return [];
+}
+
 function extractIngredientsFromHtml(html: string): string[] {
   const patterns = [
     /<li[^>]*class="[^"]*ingredient[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
     /<span[^>]*class="[^"]*ingredient[^"]*"[^>]*>([\s\S]*?)<\/span>/gi,
   ];
-
   for (const pattern of patterns) {
     const matches = [...html.matchAll(pattern)];
     if (matches.length > 0) {
@@ -218,7 +368,6 @@ function extractInstructionsFromHtml(html: string): string[] {
     /<li[^>]*class="[^"]*step[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
     /<p[^>]*class="[^"]*instruction[^"]*"[^>]*>([\s\S]*?)<\/p>/gi,
   ];
-
   for (const pattern of patterns) {
     const matches = [...html.matchAll(pattern)];
     if (matches.length > 0) {
