@@ -1,3 +1,4 @@
+import React from "react";
 import { Layout } from "@/components/layout";
 import { useGetRecipe, useDeleteRecipe, useConvertToGrams, getGetRecipeQueryKey, getListRecipesQueryKey } from "@workspace/api-client-react";
 import { useLocation, useParams, Link } from "wouter";
@@ -88,11 +89,28 @@ export default function RecipeDetail() {
     );
   }
 
-  const getDisplayedIngredient = (ingredient: string, index: number) => {
+  const formatWithOriginal = (converted: string, original: string): React.ReactNode => {
+    const volumePattern = /([\d\s½⅓⅔¼¾⅛⅜⅝⅞\/\.]+\s*(?:cups?|tablespoons?|teaspoons?|tbsps?|tsps?))/i;
+    const volumeMatch = original.match(volumePattern);
+    const gramMatch = converted.match(/^(\d+g)\s+(.+)$/);
+    if (!gramMatch) return converted;
+    const [, grams, ingredientName] = gramMatch;
+    return (
+      <>
+        <span>{grams}</span>
+        {volumeMatch && (
+          <span className="text-muted-foreground/60 text-sm"> ({volumeMatch[1].trim()})</span>
+        )}
+        <span> {ingredientName}</span>
+      </>
+    );
+  };
+
+  const getDisplayedIngredient = (ingredient: string, index: number): React.ReactNode => {
     if (!showGrams || !convertToGrams.data) return ingredient;
     const convertedInfo = convertToGrams.data.convertedIngredients[index];
     if (convertedInfo && convertedInfo.hasConversion && convertedInfo.converted) {
-      return convertedInfo.converted;
+      return formatWithOriginal(convertedInfo.converted, ingredient);
     }
     return ingredient;
   };
