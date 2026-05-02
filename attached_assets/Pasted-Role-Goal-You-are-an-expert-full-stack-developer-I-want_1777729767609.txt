@@ -1,0 +1,56 @@
+Role & Goal:
+You are an expert full-stack developer. I want you to build a complete, working "Recipe Archiver" web application. The goal of this app is to let me input a URL from a recipe blog, scrape the actual recipe data (ignoring all the blog text/ads), save it to a database, and display it in a clean, minimalist UI. I also need the ability to edit recipes, add photos, and convert volume measurements to grams.
+
+Tech Stack Requirements:
+
+Backend: Python with Flask (or FastAPI).
+
+Frontend: HTML/CSS/JS using Tailwind CSS for clean, modern, responsive styling. (Vanilla JS or React is fine, whichever you can build more reliably).
+
+Database: SQLite (use SQLAlchemy or standard sqlite3).
+
+Key Python Library: You MUST use the recipe-scrapers Python library to handle the URL import feature.
+
+Core Features & Functionality:
+
+URL Importer: A prominent input field where I can paste a recipe URL. When submitted, the backend should use the recipe-scrapers library to extract the title, ingredients, instructions, yields, and image.
+
+Clean Dashboard: A home screen displaying a grid of my saved recipes with their thumbnail images and titles.
+
+Recipe Detail View: A clean, ad-free page showing the recipe. It should look like a minimalist cookbook page.
+
+Edit/Manual Entry Mode: A form to manually edit a scraped recipe (fix typos, add notes) or manually create a recipe from scratch. Include an image upload feature that saves images locally to an uploads folder and serves them to the frontend.
+
+Gram Converter (Crucial): On the recipe detail view, include a "Convert to Grams" toggle or button. Write a utility function in the backend or frontend that detects common volume measurements (cups, tablespoons) for common ingredients (flour, sugar, butter, water/milk) and converts them to grams. For example, 1 cup of flour = 120g, 1 cup of sugar = 200g.
+
+Database Schema (Suggested):
+
+Table: Recipes
+
+id (Primary Key)
+
+title (String)
+
+source_url (String)
+
+ingredients (Text/JSON)
+
+instructions (Text/JSON)
+
+image_path (String - URL from scraper or local path for uploads)
+
+notes (Text)
+
+Implementation Steps (Please execute these systematically):
+
+Step 1: Initialize the Python backend and set up the SQLite database and schema. Create the uploads directory for local images.
+
+Step 2: Build the API endpoint for scraping URLs using the recipe-scrapers library.
+
+Step 3: Build the CRUD endpoints (Create, Read, Update, Delete) for the recipes.
+
+Step 4: Build the frontend UI with Tailwind CSS. Create the dashboard, the URL importer, and the recipe detail view.
+
+Step 5: Implement the edit functionality, image uploading, and the volume-to-grams conversion logic.
+
+Please start by outlining your approach, and then generate the code file by file, ensuring the app runs successfully.

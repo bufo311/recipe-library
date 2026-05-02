@@ -8,3 +8,124 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface ErrorResponse {
+  error: string;
+}
+
+export interface RecipeSummary {
+  id: number;
+  title: string;
+  imagePath?: string | null;
+  yields?: string | null;
+  category?: string | null;
+  sourceUrl?: string | null;
+  createdAt: string;
+}
+
+export interface Recipe {
+  id: number;
+  title: string;
+  sourceUrl?: string | null;
+  ingredients: string[];
+  instructions: string[];
+  imagePath?: string | null;
+  yields?: string | null;
+  category?: string | null;
+  notes?: string | null;
+  totalTime?: string | null;
+  prepTime?: string | null;
+  cookTime?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ScrapedRecipe {
+  title: string;
+  sourceUrl: string;
+  ingredients: string[];
+  instructions: string[];
+  imagePath?: string | null;
+  yields?: string | null;
+  totalTime?: string | null;
+  prepTime?: string | null;
+  cookTime?: string | null;
+}
+
+export interface CreateRecipeBody {
+  title: string;
+  sourceUrl?: string | null;
+  ingredients: string[];
+  instructions: string[];
+  imagePath?: string | null;
+  yields?: string | null;
+  category?: string | null;
+  notes?: string | null;
+  totalTime?: string | null;
+  prepTime?: string | null;
+  cookTime?: string | null;
+}
+
+export interface UpdateRecipeBody {
+  title?: string;
+  sourceUrl?: string | null;
+  ingredients?: string[];
+  instructions?: string[];
+  imagePath?: string | null;
+  yields?: string | null;
+  category?: string | null;
+  notes?: string | null;
+  totalTime?: string | null;
+  prepTime?: string | null;
+  cookTime?: string | null;
+}
+
+export interface ScrapeRecipeBody {
+  url: string;
+}
+
+export type RecipeStatsCategoryCountsItem = {
+  category: string;
+  count: number;
+};
+
+export interface RecipeStats {
+  totalRecipes: number;
+  categoryCounts: RecipeStatsCategoryCountsItem[];
+  /** Number of recipes added in the last 7 days */
+  recentCount: number;
+}
+
+export type ConversionResultConvertedIngredientsItem = {
+  original: string;
+  converted: string | null;
+  hasConversion: boolean;
+};
+
+export interface ConversionResult {
+  originalIngredients: string[];
+  convertedIngredients: ConversionResultConvertedIngredientsItem[];
+}
+
+export interface UploadResult {
+  url: string;
+}
+
+export interface UploadImageBody {
+  imageUrl: string;
+}
+
+export type ListRecipesParams = {
+  /**
+   * Search by title or ingredient
+   */
+  search?: string;
+  /**
+   * Filter by category
+   */
+  category?: string;
+};
+
+export type GetRecentRecipesParams = {
+  limit?: number;
+};

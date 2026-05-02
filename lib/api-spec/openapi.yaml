@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: recipes
+    description: Recipe operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,211 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /recipes:
+    get:
+      operationId: listRecipes
+      tags: [recipes]
+      summary: List all recipes
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search by title or ingredient
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by category
+      responses:
+        "200":
+          description: List of recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecipeSummary"
+    post:
+      operationId: createRecipe
+      tags: [recipes]
+      summary: Create a recipe manually
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRecipeBody"
+      responses:
+        "201":
+          description: Created recipe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+
+  /recipes/scrape:
+    post:
+      operationId: scrapeRecipe
+      tags: [recipes]
+      summary: Scrape a recipe from a URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScrapeRecipeBody"
+      responses:
+        "200":
+          description: Scraped recipe data (not yet saved)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScrapedRecipe"
+        "422":
+          description: Could not scrape recipe from URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /recipes/stats:
+    get:
+      operationId: getRecipeStats
+      tags: [recipes]
+      summary: Get recipe collection stats
+      responses:
+        "200":
+          description: Stats about the recipe collection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeStats"
+
+  /recipes/recent:
+    get:
+      operationId: getRecentRecipes
+      tags: [recipes]
+      summary: Get recently added recipes
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 6
+      responses:
+        "200":
+          description: Recently added recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecipeSummary"
+
+  /recipes/{id}:
+    get:
+      operationId: getRecipe
+      tags: [recipes]
+      summary: Get a recipe by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Recipe detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateRecipe
+      tags: [recipes]
+      summary: Update a recipe
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRecipeBody"
+      responses:
+        "200":
+          description: Updated recipe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteRecipe
+      tags: [recipes]
+      summary: Delete a recipe
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted successfully
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /recipes/{id}/convert-to-grams:
+    post:
+      operationId: convertToGrams
+      tags: [recipes]
+      summary: Convert volume measurements to grams for a recipe
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ingredients with gram conversions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversionResult"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +241,279 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    RecipeSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        imagePath:
+          type: string
+          nullable: true
+        yields:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        sourceUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required:
+        - id
+        - title
+        - createdAt
+
+    Recipe:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        sourceUrl:
+          type: string
+          nullable: true
+        ingredients:
+          type: array
+          items:
+            type: string
+        instructions:
+          type: array
+          items:
+            type: string
+        imagePath:
+          type: string
+          nullable: true
+        yields:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        totalTime:
+          type: string
+          nullable: true
+        prepTime:
+          type: string
+          nullable: true
+        cookTime:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - title
+        - ingredients
+        - instructions
+        - createdAt
+        - updatedAt
+
+    ScrapedRecipe:
+      type: object
+      properties:
+        title:
+          type: string
+        sourceUrl:
+          type: string
+        ingredients:
+          type: array
+          items:
+            type: string
+        instructions:
+          type: array
+          items:
+            type: string
+        imagePath:
+          type: string
+          nullable: true
+        yields:
+          type: string
+          nullable: true
+        totalTime:
+          type: string
+          nullable: true
+        prepTime:
+          type: string
+          nullable: true
+        cookTime:
+          type: string
+          nullable: true
+      required:
+        - title
+        - sourceUrl
+        - ingredients
+        - instructions
+
+    CreateRecipeBody:
+      type: object
+      properties:
+        title:
+          type: string
+        sourceUrl:
+          type: string
+          nullable: true
+        ingredients:
+          type: array
+          items:
+            type: string
+        instructions:
+          type: array
+          items:
+            type: string
+        imagePath:
+          type: string
+          nullable: true
+        yields:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        totalTime:
+          type: string
+          nullable: true
+        prepTime:
+          type: string
+          nullable: true
+        cookTime:
+          type: string
+          nullable: true
+      required:
+        - title
+        - ingredients
+        - instructions
+
+    UpdateRecipeBody:
+      type: object
+      properties:
+        title:
+          type: string
+        sourceUrl:
+          type: string
+          nullable: true
+        ingredients:
+          type: array
+          items:
+            type: string
+        instructions:
+          type: array
+          items:
+            type: string
+        imagePath:
+          type: string
+          nullable: true
+        yields:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        totalTime:
+          type: string
+          nullable: true
+        prepTime:
+          type: string
+          nullable: true
+        cookTime:
+          type: string
+          nullable: true
+
+    ScrapeRecipeBody:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url
+
+    RecipeStats:
+      type: object
+      properties:
+        totalRecipes:
+          type: integer
+        categoryCounts:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+              count:
+                type: integer
+            required:
+              - category
+              - count
+        recentCount:
+          type: integer
+          description: Number of recipes added in the last 7 days
+      required:
+        - totalRecipes
+        - categoryCounts
+        - recentCount
+
+    ConversionResult:
+      type: object
+      properties:
+        originalIngredients:
+          type: array
+          items:
+            type: string
+        convertedIngredients:
+          type: array
+          items:
+            type: object
+            properties:
+              original:
+                type: string
+              converted:
+                type: string
+                nullable: true
+              hasConversion:
+                type: boolean
+            required:
+              - original
+              - converted
+              - hasConversion
+      required:
+        - originalIngredients
+        - convertedIngredients
+
+    UploadResult:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url
+
+    UploadImageBody:
+      type: object
+      properties:
+        imageUrl:
+          type: string
+      required:
+        - imageUrl

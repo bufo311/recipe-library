@@ -14,3 +14,184 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary List all recipes
+ */
+export const ListRecipesQueryParams = zod.object({
+  search: zod.coerce
+    .string()
+    .optional()
+    .describe("Search by title or ingredient"),
+  category: zod.coerce.string().optional().describe("Filter by category"),
+});
+
+export const ListRecipesResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  imagePath: zod.string().nullish(),
+  yields: zod.string().nullish(),
+  category: zod.string().nullish(),
+  sourceUrl: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+export const ListRecipesResponse = zod.array(ListRecipesResponseItem);
+
+/**
+ * @summary Create a recipe manually
+ */
+export const CreateRecipeBody = zod.object({
+  title: zod.string(),
+  sourceUrl: zod.string().nullish(),
+  ingredients: zod.array(zod.string()),
+  instructions: zod.array(zod.string()),
+  imagePath: zod.string().nullish(),
+  yields: zod.string().nullish(),
+  category: zod.string().nullish(),
+  notes: zod.string().nullish(),
+  totalTime: zod.string().nullish(),
+  prepTime: zod.string().nullish(),
+  cookTime: zod.string().nullish(),
+});
+
+/**
+ * @summary Scrape a recipe from a URL
+ */
+export const ScrapeRecipeBody = zod.object({
+  url: zod.string(),
+});
+
+export const ScrapeRecipeResponse = zod.object({
+  title: zod.string(),
+  sourceUrl: zod.string(),
+  ingredients: zod.array(zod.string()),
+  instructions: zod.array(zod.string()),
+  imagePath: zod.string().nullish(),
+  yields: zod.string().nullish(),
+  totalTime: zod.string().nullish(),
+  prepTime: zod.string().nullish(),
+  cookTime: zod.string().nullish(),
+});
+
+/**
+ * @summary Get recipe collection stats
+ */
+export const GetRecipeStatsResponse = zod.object({
+  totalRecipes: zod.number(),
+  categoryCounts: zod.array(
+    zod.object({
+      category: zod.string(),
+      count: zod.number(),
+    }),
+  ),
+  recentCount: zod
+    .number()
+    .describe("Number of recipes added in the last 7 days"),
+});
+
+/**
+ * @summary Get recently added recipes
+ */
+export const getRecentRecipesQueryLimitDefault = 6;
+
+export const GetRecentRecipesQueryParams = zod.object({
+  limit: zod.coerce.number().default(getRecentRecipesQueryLimitDefault),
+});
+
+export const GetRecentRecipesResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  imagePath: zod.string().nullish(),
+  yields: zod.string().nullish(),
+  category: zod.string().nullish(),
+  sourceUrl: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+export const GetRecentRecipesResponse = zod.array(GetRecentRecipesResponseItem);
+
+/**
+ * @summary Get a recipe by ID
+ */
+export const GetRecipeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetRecipeResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  sourceUrl: zod.string().nullish(),
+  ingredients: zod.array(zod.string()),
+  instructions: zod.array(zod.string()),
+  imagePath: zod.string().nullish(),
+  yields: zod.string().nullish(),
+  category: zod.string().nullish(),
+  notes: zod.string().nullish(),
+  totalTime: zod.string().nullish(),
+  prepTime: zod.string().nullish(),
+  cookTime: zod.string().nullish(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+
+/**
+ * @summary Update a recipe
+ */
+export const UpdateRecipeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateRecipeBody = zod.object({
+  title: zod.string().optional(),
+  sourceUrl: zod.string().nullish(),
+  ingredients: zod.array(zod.string()).optional(),
+  instructions: zod.array(zod.string()).optional(),
+  imagePath: zod.string().nullish(),
+  yields: zod.string().nullish(),
+  category: zod.string().nullish(),
+  notes: zod.string().nullish(),
+  totalTime: zod.string().nullish(),
+  prepTime: zod.string().nullish(),
+  cookTime: zod.string().nullish(),
+});
+
+export const UpdateRecipeResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  sourceUrl: zod.string().nullish(),
+  ingredients: zod.array(zod.string()),
+  instructions: zod.array(zod.string()),
+  imagePath: zod.string().nullish(),
+  yields: zod.string().nullish(),
+  category: zod.string().nullish(),
+  notes: zod.string().nullish(),
+  totalTime: zod.string().nullish(),
+  prepTime: zod.string().nullish(),
+  cookTime: zod.string().nullish(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+
+/**
+ * @summary Delete a recipe
+ */
+export const DeleteRecipeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Convert volume measurements to grams for a recipe
+ */
+export const ConvertToGramsParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ConvertToGramsResponse = zod.object({
+  originalIngredients: zod.array(zod.string()),
+  convertedIngredients: zod.array(
+    zod.object({
+      original: zod.string(),
+      converted: zod.string().nullable(),
+      hasConversion: zod.boolean(),
+    }),
+  ),
+});
