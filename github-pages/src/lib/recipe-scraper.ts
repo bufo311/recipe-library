@@ -36,10 +36,47 @@ function parseDuration(iso: string | null | undefined): string | null {
   return formatMinutes(total);
 }
 
+// Fractions and number-start chars that begin a new ingredient line
+const INGREDIENT_SPLIT_RE =
+  /(?<=[a-zA-Z\)\.])\s+(?=(?:\d+[\s\/]|[½¼⅓⅔¾⅛⅜⅝⅞]))/g;
+
+function splitIngredientBlob(text: string): string[] {
+  // If the string already has newlines, split on those
+  if (/\n/.test(text)) {
+    return text.split(/\n+/).map((s) => s.trim()).filter(Boolean);
+  }
+  // Try to split on measurement-start boundaries
+  const parts = text.split(INGREDIENT_SPLIT_RE).map((s) => s.trim()).filter(Boolean);
+  // Only use the split result if it produced multiple items AND each looks like an ingredient
+  // (contains at least one letter after the leading quantity)
+  const LOOKS_LIKE_INGREDIENT = /^(?:\d|[½¼⅓⅔¾⅛⅜⅝⅞]|a\s|some\s|pinch|handful)/i;
+  if (parts.length > 1 && parts.every((p) => LOOKS_LIKE_INGREDIENT.test(p))) {
+    return parts;
+  }
+  // Fallback: return as single item
+  return [text];
+}
+
 function toStringArray(val: unknown): string[] {
   if (!val) return [];
-  if (typeof val === "string") return val.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
-  if (Array.isArray(val)) return val.filter((v) => typeof v === "string").map((v) => (v as string).trim());
+  if (typeof val === "string") {
+    const clean = val.trim();
+    if (!clean) return [];
+    // Heuristic: if the string contains measurement keywords more than once, it's a blob
+    const measureCount = (clean.match(/\b(?:cup|tablespoon|teaspoon|tbsp|tsp|pound|lb|oz|gram|pinch)\b/gi) ?? []).length;
+    if (measureCount > 1) return splitIngredientBlob(clean);
+    return [clean];
+  }
+  if (Array.isArray(val)) {
+    return val
+      .filter((v) => typeof v === "string")
+      .flatMap((v) => {
+        const s = (v as string).trim();
+        const measureCount = (s.match(/\b(?:cup|tablespoon|teaspoon|tbsp|tsp|pound|lb|oz|gram|pinch)\b/gi) ?? []).length;
+        return measureCount > 1 ? splitIngredientBlob(s) : [s];
+      })
+      .filter(Boolean);
+  }
   return [];
 }
 
@@ -163,9 +200,12 @@ function elText(el: Element): string {
 }
 
 function listItemTexts(container: Element): string[] {
-  return Array.from(container.querySelectorAll("li"))
+  const liItems = Array.from(container.querySelectorAll("li"))
     .map(elText)
-    .filter((t) => t.length > 1);
+    .filter((t) => t.length > 2);
+  if (liItems.length > 0) return liItems;
+  // Fallback: treat each <p> as a step
+  return collectParaTexts(container);
 }
 
 function firstImageSrc(doc: Document): string | null {
@@ -395,29 +435,50 @@ function extractFromHeadings(doc: Document, url: string): ScrapedRecipe | null {
   };
 }
 
-function findNextList(el: Element): Element | null {
-  // Look for the next ul/ol sibling, or the first ul/ol in a following sibling container
+function collectParaTexts(container: Element): string[] {
+  // Grab <p> tags and treat each as a step, filtering navigation noise
+  return Array.from(container.querySelectorAll("p"))
+    .map(elText)
+    .filter((t) => t.length > 15 && !/^(print|save|jump|share|subscribe|comment)/i.test(t));
+}
+
+function findNextContentBlock(el: Element): Element | null {
+  // Look for the next ul/ol sibling first, then any block with <p>/<li> content
+  const LIST_SEL = "ul, ol";
+
   let cursor: Element | null = el.nextElementSibling;
-  for (let i = 0; i < 5 && cursor; i++) {
-    if (cursor.tagName === "UL" || cursor.tagName === "OL") return cursor;
-    const inner = cursor.querySelector("ul, ol");
+  for (let i = 0; i < 8 && cursor; i++) {
+    const tag = cursor.tagName;
+    if (tag === "UL" || tag === "OL") return cursor;
+    const inner = cursor.querySelector(LIST_SEL);
     if (inner) return inner;
+    // Accept a div/section that directly contains <p> or <li>
+    if (["DIV","SECTION","ARTICLE"].includes(tag)) {
+      if (cursor.querySelector("p, li")) return cursor;
+    }
     cursor = cursor.nextElementSibling;
   }
-  // Try going up one level and searching siblings from there
+  // Try going up one level
   const parent = el.parentElement;
   if (parent) {
     let found = false;
     for (const child of Array.from(parent.children)) {
       if (found) {
-        if (child.tagName === "UL" || child.tagName === "OL") return child;
-        const inner = child.querySelector("ul, ol");
+        const tag = child.tagName;
+        if (tag === "UL" || tag === "OL") return child;
+        const inner = child.querySelector(LIST_SEL);
         if (inner) return inner;
+        if (["DIV","SECTION","ARTICLE"].includes(tag) && child.querySelector("p, li")) return child;
       }
       if (child === el) found = true;
     }
   }
   return null;
+}
+
+// Keep old name as alias used inside extractFromHeadings
+function findNextList(el: Element): Element | null {
+  return findNextContentBlock(el);
 }
 
 // ── fetch + orchestrate ───────────────────────────────────────────────────
