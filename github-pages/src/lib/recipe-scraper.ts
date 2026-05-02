@@ -13,7 +13,10 @@ export interface ScrapedRecipe {
   attribute: string[];
 }
 
-const CORS_PROXY = "https://corsproxy.io/?";
+const CORS_PROXIES = [
+  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+];
 
 function formatMinutes(minutes: number | null | undefined): string | null {
   if (!minutes) return null;
@@ -153,15 +156,24 @@ function extractFromJsonLd(recipe: any, url: string): ScrapedRecipe {
   return { title, sourceUrl: url, ingredients, instructions, imagePath, yields, totalTime, prepTime, cookTime, course, cuisine, attribute };
 }
 
-export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipe> {
-  const proxyUrl = CORS_PROXY + encodeURIComponent(url);
-  const resp = await fetch(proxyUrl);
-  if (!resp.ok) throw new Error(`Could not fetch the page (HTTP ${resp.status}). Try a different URL.`);
+async function fetchHtml(url: string): Promise<string> {
+  for (const makeProxy of CORS_PROXIES) {
+    try {
+      const resp = await fetch(makeProxy(url));
+      if (resp.ok) {
+        const text = await resp.text();
+        if (text.length > 500) return text;
+      }
+    } catch {
+      // try next proxy
+    }
+  }
+  throw new Error("Could not fetch that page. The site may be blocking external requests.");
+}
 
-  const html = await resp.text();
+function findRecipeInJsonLd(html: string, url: string): ScrapedRecipe | null {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
-
   const scripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
 
   for (const script of scripts) {
@@ -173,9 +185,7 @@ export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipe> {
         if (typeof item !== "object" || item === null) continue;
         const obj = item as Record<string, unknown>;
 
-        if (obj["@type"] === "Recipe") {
-          return extractFromJsonLd(obj, url);
-        }
+        if (obj["@type"] === "Recipe") return extractFromJsonLd(obj, url);
 
         if (obj["@graph"] && Array.isArray(obj["@graph"])) {
           const recipeNode = obj["@graph"].find(
@@ -188,6 +198,17 @@ export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipe> {
       // malformed JSON-LD, skip
     }
   }
+  return null;
+}
 
-  throw new Error("No recipe data found on that page. The site may not include structured recipe data.");
+export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipe> {
+  const html = await fetchHtml(url);
+  const recipe = findRecipeInJsonLd(html, url);
+
+  if (recipe) return recipe;
+
+  throw new Error(
+    "This site doesn't include machine-readable recipe data, so it can't be imported automatically. " +
+    "Try copying the ingredients and instructions manually, or use a site like AllRecipes, Food Network, NYT Cooking, or Serious Eats."
+  );
 }
