@@ -84,6 +84,21 @@ pnpm --filter @workspace/recipe-archiver run dev
 pnpm --filter @workspace/api-spec run codegen
 ```
 
+## Quick Start (Standalone)
+
+If you want to run this outside of Replit with a single `npm install` and no workspace tooling, use the `standalone/` folder:
+
+```bash
+git clone https://github.com/bufo311/recipe-library
+cd recipe-library/standalone
+npm install
+cp .env.example .env   # fill in your Supabase credentials
+npm run db:push
+npm run dev
+```
+
+See [`standalone/README.md`](standalone/README.md) for full setup instructions including environment variables, Supabase Storage setup, and deployment options.
+
 ## Deployment
 
 The app is structured as two services behind a shared reverse proxy:
