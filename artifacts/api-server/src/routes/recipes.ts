@@ -380,14 +380,19 @@ router.post("/uploads", upload.single("image"), async (req, res) => {
   }
 
   try {
+    const sharp = (await import("sharp")).default;
+    const resized = await sharp(req.file.buffer)
+      .resize({ width: 1200, height: 1200, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 75 })
+      .toBuffer();
+
     const supabase = getSupabaseClient();
-    const ext = path.extname(req.file.originalname) || ".jpg";
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
 
     const { error } = await supabase.storage
       .from(STORAGE_BUCKET)
-      .upload(filename, req.file.buffer, {
-        contentType: req.file.mimetype,
+      .upload(filename, resized, {
+        contentType: "image/jpeg",
         upsert: false,
       });
 
