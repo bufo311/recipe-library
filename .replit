@@ -33,3 +33,9 @@ externalPort = 3000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+SUPABASE_URL = "https://onxvdyidarhtzvxeeskq.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY = "sb_secret_hSoFyIVu1DNLnRxh7S-6Lw_NSQhCby0"
