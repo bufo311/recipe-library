@@ -522,46 +522,103 @@ function findRecipeInJsonLd(doc: Document, url: string): ScrapedRecipe | null {
   return null;
 }
 
-const SCRAPE_API_URL = import.meta.env.VITE_SCRAPE_API_URL as string | undefined;
+// ── Jina.ai markdown fallback ─────────────────────────────────────────────
+// Used when CORS proxies are blocked (e.g. Cloudflare-protected sites).
+// r.jina.ai is a free, maintained service with no account required.
 
-async function scrapeViaApi(url: string): Promise<ScrapedRecipe | null> {
-  if (!SCRAPE_API_URL) return null;
+async function fetchViaJina(url: string): Promise<string | null> {
   try {
-    const resp = await fetch(`${SCRAPE_API_URL}/api/recipes/scrape`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
+    const resp = await fetch(`https://r.jina.ai/${url}`, {
+      headers: { Accept: "text/plain" },
     });
     if (!resp.ok) return null;
-    const data = await resp.json();
-    if (!data.title) return null;
-    // Map API response shape → ScrapedRecipe
-    return {
-      title: data.title,
-      sourceUrl: data.sourceUrl ?? url,
-      ingredients: data.ingredients ?? [],
-      instructions: data.instructions ?? [],
-      imagePath: data.imagePath ?? null,
-      yields: data.yields ?? null,
-      totalTime: data.totalTime ?? null,
-      prepTime: data.prepTime ?? null,
-      cookTime: data.cookTime ?? null,
-      course: data.course ?? null,
-      cuisine: data.cuisine ?? null,
-      attribute: data.attribute ?? [],
-    };
+    const text = await resp.text();
+    return text.length > 200 ? text : null;
   } catch {
     return null;
   }
 }
 
+function parseJinaMarkdown(text: string, url: string): ScrapedRecipe | null {
+  // Title
+  const titleMatch = text.match(/^Title:\s*(.+)$/m);
+  if (!titleMatch) return null;
+  const title = titleMatch[1].replace(/\s*[|\-–].*$/, "").trim();
+
+  // Ingredients section — between "Ingredients" and next ## heading
+  const ingredSectionMatch = text.match(
+    /\bIngredients\b\s*\n([\s\S]*?)(?=\n##\s|\Z)/i
+  );
+  const ingredients: string[] = [];
+  if (ingredSectionMatch) {
+    const lines = ingredSectionMatch[1].split("\n").map((l) => l.trim()).filter(Boolean);
+    // Jina formats quantities as standalone lines followed by the ingredient text
+    // e.g. "1\n\nmedium onion, chopped" → "1 medium onion, chopped"
+    const QUANTITY_RE = /^(?:\d[\d\s/]*|[½¼⅓⅔¾⅛⅜⅝⅞]+)$/;
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+      if (QUANTITY_RE.test(line) && i + 1 < lines.length && !QUANTITY_RE.test(lines[i + 1])) {
+        ingredients.push(`${line} ${lines[i + 1]}`);
+        i += 2;
+      } else if (line.length > 2 && !/^#+/.test(line)) {
+        ingredients.push(line);
+        i++;
+      } else {
+        i++;
+      }
+    }
+  }
+
+  // Instructions section — under ## Preparation / Instructions / Directions / Steps
+  const instrSectionMatch = text.match(
+    /##\s*(?:Preparation|Instructions?|Directions?|Steps?|Method)\s*\n([\s\S]*?)(?=\n##\s|$)/i
+  );
+  const instructions: string[] = [];
+  if (instrSectionMatch) {
+    const section = instrSectionMatch[1];
+    // Split on step boundaries: "1.   #### Step N" or "#### Step N" or numbered list items
+    const stepBlocks = section.split(/\n(?=\d+\.\s+|####\s*Step\s*\d)/i).filter(Boolean);
+    for (const block of stepBlocks) {
+      const clean = block
+        .replace(/####\s*Step\s*\d+/gi, "")
+        .replace(/^\d+\.\s+/, "")
+        .replace(/\*\*([^*]+)\*\*/g, "$1")
+        .replace(/\*([^*]+)\*/g, "$1")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (clean.length > 20) instructions.push(clean);
+    }
+  }
+
+  if (ingredients.length === 0 && instructions.length === 0) return null;
+
+  const searchText = [title, ...ingredients].join(" ");
+  return {
+    title,
+    sourceUrl: url,
+    ingredients,
+    instructions,
+    imagePath: null,
+    yields: null,
+    totalTime: null,
+    prepTime: null,
+    cookTime: null,
+    course: guessFromText(searchText, COURSE_MAP),
+    cuisine: guessFromText(searchText, CUISINE_MAP),
+    attribute: guessAttributes(searchText),
+  };
+}
+
+// ── main entry point ──────────────────────────────────────────────────────
+
 export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipe> {
-  // 1. Try CORS proxies + local HTML parsing
+  // 1. Try CORS proxies → parse HTML locally
   let html: string | null = null;
   try {
     html = await fetchHtml(url);
   } catch {
-    // proxies failed — fall through to API
+    // fall through
   }
 
   if (html) {
@@ -575,9 +632,12 @@ export async function scrapeRecipeFromUrl(url: string): Promise<ScrapedRecipe> {
     if (recipe) return recipe;
   }
 
-  // 2. Fall back to the Replit API server (handles sites that block CORS proxies)
-  const apiResult = await scrapeViaApi(url);
-  if (apiResult) return apiResult;
+  // 2. Jina.ai — free, permanent, no account required, bypasses Cloudflare
+  const jinaText = await fetchViaJina(url);
+  if (jinaText) {
+    const recipe = parseJinaMarkdown(jinaText, url);
+    if (recipe) return recipe;
+  }
 
   throw new Error(
     "Couldn't automatically extract a recipe from this page. " +
