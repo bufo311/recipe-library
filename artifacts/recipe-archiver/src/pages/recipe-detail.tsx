@@ -16,12 +16,28 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { useTheme } from "@/lib/theme-context";
 import type { ThemeColors } from "@/lib/theme";
 
-import bannerSvg from "@/assets/banner.svg";
+import banner1Svg from "@/assets/banner-1.svg";
+import banner2Svg from "@/assets/banner-2.svg";
+import banner3Svg from "@/assets/banner-3.svg";
 
-function TitleBanner({ title, c }: { title: string; c: ThemeColors }) {
-  // Curve approximating the cream ribbon's centerline in banner SVG (viewBox 0 0 288 144).
-  // Symmetric shallow smile so text dips slightly in the middle to follow the sash.
-  const curve = "M 59.8 94.9 C 116.2 109.2 185.1 23.1 237.4 59.6";
+// Each banner's text-curve is hand-tuned to follow its ribbon shape (viewBox 0 0 288 144).
+// To add a new banner, append { src, curve } here and it'll automatically join the rotation.
+const BANNERS: { src: string; curve: string }[] = [
+  { src: banner1Svg, curve: "M 59.8 94.9 C 116.2 109.2 185.1 23.1 237.4 59.6" },
+  // TODO: tune curves for banners 2 and 3 (placeholder = flat horizontal across middle)
+  { src: banner2Svg, curve: "M 50 72 L 238 72" },
+  { src: banner3Svg, curve: "M 50 72 L 238 72" },
+];
+
+function pickBanner(seed: number) {
+  const s = ((seed | 0) >>> 0) || 1;
+  // Single-step LCG to spread sequential ids across banner choices.
+  const mixed = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+  return BANNERS[mixed % BANNERS.length];
+}
+
+function TitleBanner({ title, c, seed }: { title: string; c: ThemeColors; seed: number }) {
+  const banner = pickBanner(seed);
   const pathRef = useRef<SVGPathElement>(null);
   const textRef = useRef<SVGTextElement>(null);
   const len = title.length;
@@ -42,11 +58,11 @@ function TitleBanner({ title, c }: { title: string; c: ThemeColors }) {
   }, [title, fontSize]);
   return (
     <div style={{ position: "relative", width: "100%", aspectRatio: "288 / 144" }}>
-      <img src={bannerSvg} alt="" style={{ width: "100%", height: "100%", display: "block",
+      <img src={banner.src} alt="" style={{ width: "100%", height: "100%", display: "block",
         filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.35))" }} />
       <svg viewBox="0 0 288 144" preserveAspectRatio="xMidYMid meet"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
-        <defs><path ref={pathRef} id="banner-curve" d={curve} fill="none" /></defs>
+        <defs><path ref={pathRef} id="banner-curve" d={banner.curve} fill="none" /></defs>
         <text ref={textRef} fontFamily="'Playfair Display', serif" fontWeight={700} fontSize={fontSize}
           fill={c.ink} textAnchor="middle" letterSpacing="0.3">
           <textPath href="#banner-curve" startOffset="50%">{title}</textPath>
@@ -145,7 +161,7 @@ export default function RecipeDetail() {
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='2' cy='2' r='0.5' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")` }} />
             {/* Banner: in-flow on mobile (full width, no overhang), absolute BANNER 1 placement on sm+ */}
             <div className="relative w-auto -mx-4 pointer-events-none z-30 mb-3 sm:mx-0 sm:mb-0 sm:absolute sm:left-[-33%] sm:top-[-14.3%] sm:w-[87.5%]">
-              <TitleBanner title={recipe.title} c={c} />
+              <TitleBanner title={recipe.title} c={c} seed={recipe.id} />
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start items-center gap-4 relative">
               <div className="flex-1 order-2 sm:order-1 sm:min-h-[90px]">
