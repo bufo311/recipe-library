@@ -84,11 +84,13 @@ export default function RecipeNew() {
           )}
         </div>
         <LabelFrame variant={2}>
-          <RecipeForm
-            defaultValues={defaultValues}
-            onSubmit={handleSubmit}
-            isSubmitting={createRecipe.isPending}
-          />
+          <div className="bg-card p-8">
+            <RecipeForm
+              defaultValues={defaultValues}
+              onSubmit={handleSubmit}
+              isSubmitting={createRecipe.isPending}
+            />
+          </div>
         </LabelFrame>
       </div>
     </Layout>

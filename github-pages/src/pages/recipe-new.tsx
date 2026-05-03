@@ -75,7 +75,9 @@ export default function RecipeNew() {
           {isImport && <p className="text-muted-foreground mt-2">We've filled in what we found. Check the guessed tags, make any corrections, then save.</p>}
         </div>
         <LabelFrame variant={2}>
-          <RecipeForm defaultValues={defaultValues} onSubmit={handleSubmit} isSubmitting={createRecipe.isPending} />
+          <div className="bg-card p-8">
+            <RecipeForm defaultValues={defaultValues} onSubmit={handleSubmit} isSubmitting={createRecipe.isPending} />
+          </div>
         </LabelFrame>
       </div>
     </Layout>
