@@ -36,6 +36,7 @@ export interface RecipeSummary {
   sourceUrl: string | null;
   course: string | null;
   cuisine: string | null;
+  cook: string | null;
   attribute: string[];
   createdAt: string;
 }
@@ -60,6 +61,7 @@ export interface RecipeFacets {
   courses: string[];
   cuisines: string[];
   attributes: string[];
+  cooks: string[];
 }
 
 export interface ScrapedRecipe {
@@ -74,6 +76,7 @@ export interface ScrapedRecipe {
   cookTime: string | null;
   course: string | null;
   cuisine: string | null;
+  cook: string | null;
   attribute: string[];
 }
 
@@ -96,6 +99,7 @@ export interface CreateRecipeBody {
   cookTime?: string;
   course?: string;
   cuisine?: string;
+  cook?: string;
   attribute?: string[];
 }
 
@@ -107,6 +111,7 @@ export interface ListRecipesParams {
   course?: string;
   cuisine?: string;
   attribute?: string;
+  cook?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -130,6 +135,7 @@ function rowToRecipe(row: any): Recipe {
     cookTime: row.cook_time ?? null,
     course: row.course ?? null,
     cuisine: row.cuisine ?? null,
+    cook: row.cook ?? null,
     attribute: row.attribute ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -147,6 +153,7 @@ function rowToSummary(row: any): RecipeSummary {
     category: row.category ?? null,
     course: row.course ?? null,
     cuisine: row.cuisine ?? null,
+    cook: row.cook ?? null,
     attribute: row.attribute ?? [],
     createdAt: row.created_at,
   };
@@ -167,6 +174,7 @@ function recipeToRow(data: CreateRecipeBody) {
     cook_time: data.cookTime ?? null,
     course: data.course ?? null,
     cuisine: data.cuisine ?? null,
+    cook: data.cook ?? null,
     attribute: data.attribute ?? [],
   };
 }
@@ -176,7 +184,7 @@ function recipeToRow(data: CreateRecipeBody) {
 // ---------------------------------------------------------------------------
 
 const SUMMARY_COLUMNS =
-  "id, title, image_path, yields, category, source_url, course, cuisine, attribute, created_at";
+  "id, title, image_path, yields, category, source_url, course, cuisine, cook, attribute, created_at";
 
 async function fetchListRecipes(params?: ListRecipesParams): Promise<RecipeSummary[]> {
   let q = supabase.from("recipes").select(SUMMARY_COLUMNS).order("created_at", { ascending: false });
@@ -184,6 +192,7 @@ async function fetchListRecipes(params?: ListRecipesParams): Promise<RecipeSumma
   if (params?.category) q = q.eq("category", params.category);
   if (params?.course) q = q.eq("course", params.course);
   if (params?.cuisine) q = q.eq("cuisine", params.cuisine);
+  if (params?.cook) q = q.eq("cook", params.cook);
   if (params?.attribute) q = q.contains("attribute", [params.attribute]);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
@@ -217,13 +226,14 @@ async function fetchRecipeStats(): Promise<RecipeStats> {
 }
 
 async function fetchRecipeFacets(): Promise<RecipeFacets> {
-  const { data, error } = await supabase.from("recipes").select("course, cuisine, attribute");
+  const { data, error } = await supabase.from("recipes").select("course, cuisine, cook, attribute");
   if (error) throw new Error(error.message);
   const rows = data ?? [];
   const courses = [...new Set(rows.map((r) => r.course).filter((v): v is string => !!v))].sort();
   const cuisines = [...new Set(rows.map((r) => r.cuisine).filter((v): v is string => !!v))].sort();
+  const cooks = [...new Set(rows.map((r) => r.cook).filter((v): v is string => !!v))].sort();
   const attributes = [...new Set(rows.flatMap((r) => (r.attribute as string[]) ?? []))].sort();
-  return { courses, cuisines, attributes };
+  return { courses, cuisines, attributes, cooks };
 }
 
 async function doCreateRecipe(body: CreateRecipeBody): Promise<Recipe> {
@@ -247,6 +257,7 @@ async function doUpdateRecipe(id: number, body: UpdateRecipeBody): Promise<Recip
   if (body.cookTime !== undefined) updates.cook_time = body.cookTime ?? null;
   if (body.course !== undefined) updates.course = body.course ?? null;
   if (body.cuisine !== undefined) updates.cuisine = body.cuisine ?? null;
+  if (body.cook !== undefined) updates.cook = body.cook ?? null;
   if (body.attribute !== undefined) updates.attribute = body.attribute ?? [];
   const { data, error } = await supabase.from("recipes").update(updates).eq("id", id).select().single();
   if (error) throw new Error(error.message);

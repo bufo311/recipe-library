@@ -47,6 +47,7 @@ router.get("/recipes", async (req, res) => {
         sourceUrl: recipesTable.sourceUrl,
         course: recipesTable.course,
         cuisine: recipesTable.cuisine,
+        cook: recipesTable.cook,
         attribute: recipesTable.attribute,
         createdAt: recipesTable.createdAt,
       })
@@ -66,6 +67,9 @@ router.get("/recipes", async (req, res) => {
     }
     if (params.cuisine) {
       conditions.push(eq(recipesTable.cuisine, params.cuisine));
+    }
+    if (params.cook) {
+      conditions.push(eq(recipesTable.cook, params.cook));
     }
     if (params.attribute) {
       conditions.push(
@@ -117,6 +121,7 @@ router.post("/recipes", async (req, res) => {
         cookTime: data.cookTime ?? null,
         course: data.course ?? null,
         cuisine: data.cuisine ?? null,
+        cook: data.cook ?? null,
         attribute: data.attribute ?? [],
       })
       .returning();
@@ -189,6 +194,7 @@ router.get("/recipes/recent", async (req, res) => {
         sourceUrl: recipesTable.sourceUrl,
         course: recipesTable.course,
         cuisine: recipesTable.cuisine,
+        cook: recipesTable.cook,
         attribute: recipesTable.attribute,
         createdAt: recipesTable.createdAt,
       })
@@ -215,17 +221,19 @@ router.get("/recipes/facets", async (req, res) => {
       .select({
         course: recipesTable.course,
         cuisine: recipesTable.cuisine,
+        cook: recipesTable.cook,
         attribute: recipesTable.attribute,
       })
       .from(recipesTable);
 
     const courses = [...new Set(rows.map((r) => r.course).filter((v): v is string => !!v))].sort();
     const cuisines = [...new Set(rows.map((r) => r.cuisine).filter((v): v is string => !!v))].sort();
+    const cooks = [...new Set(rows.map((r) => r.cook).filter((v): v is string => !!v))].sort();
     const attributes = [
       ...new Set(rows.flatMap((r) => (r.attribute as string[]) ?? [])),
     ].sort();
 
-    res.json({ courses, cuisines, attributes });
+    res.json({ courses, cuisines, attributes, cooks });
   } catch (err) {
     req.log.error({ err }, "Failed to get facets");
     res.status(500).json({ error: "Failed to get facets" });
@@ -290,6 +298,7 @@ router.put("/recipes/:id", async (req, res) => {
     if (data.cookTime !== undefined) updates.cookTime = data.cookTime ?? null;
     if (data.course !== undefined) updates.course = data.course ?? null;
     if (data.cuisine !== undefined) updates.cuisine = data.cuisine ?? null;
+    if (data.cook !== undefined) updates.cook = data.cook ?? null;
     if (data.attribute !== undefined) updates.attribute = data.attribute ?? [];
 
     const [recipe] = await db

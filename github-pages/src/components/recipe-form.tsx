@@ -25,6 +25,7 @@ const recipeSchema = z.object({
   notes: z.string().optional().or(z.literal("")),
   course: z.string().optional().or(z.literal("")),
   cuisine: z.string().optional().or(z.literal("")),
+  cook: z.string().optional().or(z.literal("")),
   attribute: z.array(z.string()).default([]),
   ingredients: z.array(z.object({ value: z.string().min(1, "Cannot be empty") })).min(1, "At least one ingredient is required"),
   instructions: z.array(z.object({ value: z.string().min(1, "Cannot be empty") })).min(1, "At least one instruction is required"),
@@ -57,6 +58,7 @@ export function RecipeForm({ defaultValues, onSubmit, isSubmitting }: RecipeForm
       notes: defaultValues?.notes || "",
       course: defaultValues?.course || "",
       cuisine: defaultValues?.cuisine || "",
+      cook: defaultValues?.cook || (typeof window !== "undefined" ? localStorage.getItem("spencer-cook") || "" : ""),
       attribute: defaultValues?.attribute || [],
       ingredients: defaultValues?.ingredients?.length ? defaultValues.ingredients : [{ value: "" }],
       instructions: defaultValues?.instructions?.length ? defaultValues.instructions : [{ value: "" }],
@@ -138,6 +140,11 @@ export function RecipeForm({ defaultValues, onSubmit, isSubmitting }: RecipeForm
             <FormField control={form.control} name="cuisine" render={({ field }) => (
               <FormItem><FormLabel>Cuisine</FormLabel><FormControl>
                 <CreatableCombobox options={facets?.cuisines ?? []} value={field.value || ""} onChange={field.onChange} placeholder="e.g. Italian, Mexican" />
+              </FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="cook" render={({ field }) => (
+              <FormItem><FormLabel>Cook</FormLabel><FormControl>
+                <CreatableCombobox options={facets?.cooks ?? []} value={field.value || ""} onChange={(v) => { field.onChange(v); if (typeof window !== "undefined" && v) localStorage.setItem("spencer-cook", v); }} placeholder="Who's adding this?" />
               </FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="attribute" render={({ field }) => (

@@ -13,7 +13,7 @@ import { useTheme } from "@/lib/theme-context";
 
 const CARD_ACCENT_KEYS = ["maroon", "teal", "black", "ink", "powder", "rose"] as const;
 
-interface Filters { course: string | null; cuisine: string | null; attribute: string | null; }
+interface Filters { course: string | null; cuisine: string | null; attribute: string | null; cook: string | null; }
 
 export default function Dashboard() {
   const { colors: c, patterns: p } = useTheme();
@@ -21,12 +21,14 @@ export default function Dashboard() {
 
   const [search, setSearch]   = useState("");
   const debouncedSearch        = useDebounce(search, 300);
-  const [filters, setFilters] = useState<Filters>({ course: null, cuisine: null, attribute: null });
+  const [filters, setFilters] = useState<Filters>({ course: null, cuisine: null, attribute: null, cook: null });
   const activeFilterCount      = Object.values(filters).filter(Boolean).length;
+  const myCook = typeof window !== "undefined" ? localStorage.getItem("spencer-cook") : null;
 
   const { data: recipes, isLoading } = useListRecipes(
     { search: debouncedSearch || undefined, course: filters.course ?? undefined,
-      cuisine: filters.cuisine ?? undefined, attribute: filters.attribute ?? undefined },
+      cuisine: filters.cuisine ?? undefined, attribute: filters.attribute ?? undefined,
+      cook: filters.cook ?? undefined },
     { query: { queryKey: ["/api/recipes", debouncedSearch, filters] } }
   );
   const { data: stats  } = useGetRecipeStats();
@@ -34,12 +36,13 @@ export default function Dashboard() {
 
   const toggleFilter = (facet: keyof Filters, value: string) =>
     setFilters(prev => ({ ...prev, [facet]: prev[facet] === value ? null : value }));
-  const clearFilters = () => setFilters({ course: null, cuisine: null, attribute: null });
+  const clearFilters = () => setFilters({ course: null, cuisine: null, attribute: null, cook: null });
 
   const hasFacets =
     (facets?.courses?.length  ?? 0) > 0 ||
     (facets?.cuisines?.length ?? 0) > 0 ||
-    (facets?.attributes?.length ?? 0) > 0;
+    (facets?.attributes?.length ?? 0) > 0 ||
+    (facets?.cooks?.length ?? 0) > 0;
 
   const FilterPill = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
     <button onClick={onClick} style={{
@@ -159,6 +162,18 @@ export default function Dashboard() {
                       </div>
                     </div>
                   )}
+                  {(facets?.cooks?.length ?? 0) > 0 && (
+                    <div className="space-y-1.5">
+                      <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
+                        textTransform: "uppercase", letterSpacing: "0.15em", color: c.ink, opacity: 0.4 }}>Cook</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {myCook && facets!.cooks.includes(myCook) && (
+                          <FilterPill active={filters.cook === myCook} onClick={() => toggleFilter("cook", myCook)}>★ Just mine</FilterPill>
+                        )}
+                        {facets!.cooks.map(v => <FilterPill key={v} active={filters.cook === v} onClick={() => toggleFilter("cook", v)}>{v}</FilterPill>)}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {/* Divider between filters and search row */}
                 <div style={{ marginTop: "0.85rem", height: 1, backgroundColor: c.ink, opacity: 0.12 }} />
@@ -234,7 +249,7 @@ export default function Dashboard() {
                         borderBottom: `1px solid ${c.black}` }}>
                         <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.58rem",
                           textTransform: "uppercase", letterSpacing: "0.2em", color: c.cream, opacity: 0.9 }}>
-                          {[recipe.course, recipe.cuisine].filter(Boolean).join(" · ") || "Spencer's Emporium"}
+                          {[recipe.course, recipe.cuisine, recipe.cook && `by ${recipe.cook}`].filter(Boolean).join(" · ") || "Spencer's Emporium"}
                         </p>
                       </div>
 

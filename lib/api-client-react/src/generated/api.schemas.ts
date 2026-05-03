@@ -22,6 +22,7 @@ export interface RecipeSummary {
   sourceUrl?: string | null;
   course?: string | null;
   cuisine?: string | null;
+  cook?: string | null;
   attribute: string[];
   createdAt: string;
 }
@@ -41,6 +42,7 @@ export interface Recipe {
   cookTime?: string | null;
   course?: string | null;
   cuisine?: string | null;
+  cook?: string | null;
   attribute: string[];
   createdAt: string;
   updatedAt: string;
@@ -58,6 +60,7 @@ export interface ScrapedRecipe {
   cookTime?: string | null;
   course?: string | null;
   cuisine?: string | null;
+  cook?: string | null;
   attribute: string[];
 }
 
@@ -75,6 +78,7 @@ export interface CreateRecipeBody {
   cookTime?: string | null;
   course?: string | null;
   cuisine?: string | null;
+  cook?: string | null;
   attribute?: string[];
 }
 
@@ -92,6 +96,7 @@ export interface UpdateRecipeBody {
   cookTime?: string | null;
   course?: string | null;
   cuisine?: string | null;
+  cook?: string | null;
   attribute?: string[];
 }
 
@@ -115,6 +120,7 @@ export interface RecipeFacets {
   courses: string[];
   cuisines: string[];
   attributes: string[];
+  cooks: string[];
 }
 
 export type ConversionResultConvertedIngredientsItem = {
@@ -157,6 +163,10 @@ export type ListRecipesParams = {
    * Filter by attribute facet (recipes containing this attribute)
    */
   attribute?: string;
+  /**
+   * Filter by cook (who added the recipe)
+   */
+  cook?: string;
 };
 
 export type GetRecentRecipesParams = {

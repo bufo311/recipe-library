@@ -165,11 +165,12 @@ export default function RecipeDetail() {
             borderTop: `2px solid ${c.black}`, borderBottom: `2px solid ${c.black}` }}>
             <div className="flex gap-6 flex-wrap">
               {[
-                { label: "Course",  val: recipe.course     },
-                { label: "Cuisine", val: recipe.cuisine    },
-                { label: "Prep",    val: recipe.prepTime   },
-                { label: "Cook",    val: recipe.cookTime   },
-                { label: "Yield",   val: recipe.yields     },
+                { label: "Course",   val: recipe.course     },
+                { label: "Cuisine",  val: recipe.cuisine    },
+                { label: "Added By", val: recipe.cook       },
+                { label: "Prep",     val: recipe.prepTime   },
+                { label: "Cook Time",val: recipe.cookTime   },
+                { label: "Yield",    val: recipe.yields     },
               ].filter(x => x.val).map((x, i) => (
                 <div key={x.label} className={i > 0 ? "border-l border-white border-opacity-20 pl-4" : ""}>
                   <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.5rem",

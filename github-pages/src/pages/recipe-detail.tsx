@@ -169,8 +169,9 @@ export default function RecipeDetail() {
               {[
                 { label: "Course",  val: recipe.course     },
                 { label: "Cuisine", val: recipe.cuisine    },
+                { label: "Added By", val: recipe.cook       },
                 { label: "Prep",    val: recipe.prepTime   },
-                { label: "Cook",    val: recipe.cookTime   },
+                { label: "Cook Time", val: recipe.cookTime },
                 { label: "Yield",   val: recipe.yields     },
               ].filter(x => x.val).map((x, i) => (
                 <div key={x.label} className={i > 0 ? "border-l border-white border-opacity-20 pl-4" : ""}>

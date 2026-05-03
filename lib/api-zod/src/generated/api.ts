@@ -30,6 +30,10 @@ export const ListRecipesQueryParams = zod.object({
     .string()
     .optional()
     .describe("Filter by attribute facet (recipes containing this attribute)"),
+  cook: zod.coerce
+    .string()
+    .optional()
+    .describe("Filter by cook (who added the recipe)"),
 });
 
 export const ListRecipesResponseItem = zod.object({
@@ -41,6 +45,7 @@ export const ListRecipesResponseItem = zod.object({
   sourceUrl: zod.string().nullish(),
   course: zod.string().nullish(),
   cuisine: zod.string().nullish(),
+  cook: zod.string().nullish(),
   attribute: zod.array(zod.string()),
   createdAt: zod.string(),
 });
@@ -63,6 +68,7 @@ export const CreateRecipeBody = zod.object({
   cookTime: zod.string().nullish(),
   course: zod.string().nullish(),
   cuisine: zod.string().nullish(),
+  cook: zod.string().nullish(),
   attribute: zod.array(zod.string()).optional(),
 });
 
@@ -85,6 +91,7 @@ export const ScrapeRecipeResponse = zod.object({
   cookTime: zod.string().nullish(),
   course: zod.string().nullish(),
   cuisine: zod.string().nullish(),
+  cook: zod.string().nullish(),
   attribute: zod.array(zod.string()),
 });
 
@@ -122,6 +129,7 @@ export const GetRecentRecipesResponseItem = zod.object({
   sourceUrl: zod.string().nullish(),
   course: zod.string().nullish(),
   cuisine: zod.string().nullish(),
+  cook: zod.string().nullish(),
   attribute: zod.array(zod.string()),
   createdAt: zod.string(),
 });
@@ -134,6 +142,7 @@ export const GetRecipeFacetsResponse = zod.object({
   courses: zod.array(zod.string()),
   cuisines: zod.array(zod.string()),
   attributes: zod.array(zod.string()),
+  cooks: zod.array(zod.string()),
 });
 
 /**
@@ -158,6 +167,7 @@ export const GetRecipeResponse = zod.object({
   cookTime: zod.string().nullish(),
   course: zod.string().nullish(),
   cuisine: zod.string().nullish(),
+  cook: zod.string().nullish(),
   attribute: zod.array(zod.string()),
   createdAt: zod.string(),
   updatedAt: zod.string(),
@@ -184,6 +194,7 @@ export const UpdateRecipeBody = zod.object({
   cookTime: zod.string().nullish(),
   course: zod.string().nullish(),
   cuisine: zod.string().nullish(),
+  cook: zod.string().nullish(),
   attribute: zod.array(zod.string()).optional(),
 });
 
@@ -202,6 +213,7 @@ export const UpdateRecipeResponse = zod.object({
   cookTime: zod.string().nullish(),
   course: zod.string().nullish(),
   cuisine: zod.string().nullish(),
+  cook: zod.string().nullish(),
   attribute: zod.array(zod.string()),
   createdAt: zod.string(),
   updatedAt: zod.string(),

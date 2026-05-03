@@ -63,6 +63,12 @@ paths:
           schema:
             type: string
           description: Filter by attribute facet (recipes containing this attribute)
+        - name: cook
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by cook (who added the recipe)
       responses:
         "200":
           description: List of recipes
@@ -305,6 +311,9 @@ components:
         cuisine:
           type: string
           nullable: true
+        cook:
+          type: string
+          nullable: true
         attribute:
           type: array
           items:
@@ -362,6 +371,9 @@ components:
         cuisine:
           type: string
           nullable: true
+        cook:
+          type: string
+          nullable: true
         attribute:
           type: array
           items:
@@ -413,6 +425,9 @@ components:
           type: string
           nullable: true
         cuisine:
+          type: string
+          nullable: true
+        cook:
           type: string
           nullable: true
         attribute:
@@ -469,6 +484,9 @@ components:
         cuisine:
           type: string
           nullable: true
+        cook:
+          type: string
+          nullable: true
         attribute:
           type: array
           items:
@@ -519,6 +537,9 @@ components:
           type: string
           nullable: true
         cuisine:
+          type: string
+          nullable: true
+        cook:
           type: string
           nullable: true
         attribute:
@@ -574,10 +595,15 @@ components:
           type: array
           items:
             type: string
+        cooks:
+          type: array
+          items:
+            type: string
       required:
         - courses
         - cuisines
         - attributes
+        - cooks
 
     ConversionResult:
       type: object

@@ -61,6 +61,7 @@ export default function RecipeNew() {
         notes: values.notes || undefined,
         course: values.course || undefined,
         cuisine: values.cuisine || undefined,
+        cook: values.cook || undefined,
         attribute: values.attribute || [],
         ingredients: values.ingredients.map((i) => i.value),
         instructions: values.instructions.map((i) => i.value),
