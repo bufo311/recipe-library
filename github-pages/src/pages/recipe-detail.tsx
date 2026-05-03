@@ -87,26 +87,47 @@ function pickPalette(seed: number): [number, number, number] {
   return PALETTE[mixed % PALETTE.length];
 }
 
-function svgDataUrl(raw: string, mainOrig: string, backOrig: string, mainNew: string, backNew: string): string {
-  const recolored = raw.replaceAll(mainOrig, mainNew).replaceAll(backOrig, backNew);
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(recolored)}`;
+// Derive a full coordinated 5-color set from a single palette hue.
+// main/back share the hue. border is a warm analogous shift (+28°).
+// detail is near-complementary (+160°). warm is a mid analogous (+48°).
+function deriveColors(seed: number) {
+  const [h, s, l] = pickPalette(seed);
+  return {
+    main:   hslToHex(h, s, l),
+    back:   hslToHex(h, s, Math.max(8, l - 18)),
+    border: hslToHex((h + 28) % 360, Math.max(10, s - 5),  Math.min(85, l + 10)),
+    detail: hslToHex((h + 160) % 360, Math.max(10, s - 15), Math.min(80, l + 5)),
+    warm:   hslToHex((h + 48) % 360, Math.max(10, s - 8),  Math.min(82, l + 12)),
+  };
 }
 
+// Per-banner: orig is the set of original hex values for each recolorable role.
+// All roles shift together from a single seed so the palette is always coherent.
+type BannerOrig = { main: string; back: string; border: string; detail: string; warm?: string };
 type Banner = {
   raw: string;
-  mainHex: string;
-  backHex: string;
-  textFill: string;
-  textStroke: string;
+  orig: BannerOrig;
   curve: string;
   leftPct: number;
   topPct: number;
   widthPct: number;
 };
 const BANNERS: Banner[] = [
-  { raw: banner1Raw, mainHex: "#b6402f", backHex: "#5c5637", textFill: "#b5c0af", textStroke: "#908365", curve: "M 61.8 91.6 C 118.2 103.8 187.1 19.8 239.4 56.3", leftPct: -26.7, topPct: -14.7, widthPct: 94.2 },
-  { raw: banner2Raw, mainHex: "#53996e", backHex: "#215741", textFill: "#66867f", textStroke: "#cb5f4f", curve: "M 45.4 90.4 C 110.0 118.6 177.3 60.9 238.0 68.7", leftPct: -24.6, topPct: -21.9, widthPct: 96.1 },
-  { raw: banner3Raw, mainHex: "#e0d37b", backHex: "#5d4b24", textFill: "#ac67aa", textStroke: "#96853f", curve: "M 46.8 53.6 C 116.3 25.7 167.9 99.3 237.4 84.7", leftPct: -27.4, topPct: -10.0, widthPct: 99.4 },
+  {
+    raw: banner1Raw,
+    orig: { main: "#b6402f", back: "#5c5637", border: "#908365", detail: "#b5c0af" },
+    curve: "M 61.8 91.6 C 118.2 103.8 187.1 19.8 239.4 56.3", leftPct: -26.7, topPct: -14.7, widthPct: 94.2,
+  },
+  {
+    raw: banner2Raw,
+    orig: { main: "#53996e", back: "#215741", border: "#cb5f4f", detail: "#66867f", warm: "#c3a87b" },
+    curve: "M 45.4 90.4 C 110.0 118.6 177.3 60.9 238.0 68.7", leftPct: -24.6, topPct: -21.9, widthPct: 96.1,
+  },
+  {
+    raw: banner3Raw,
+    orig: { main: "#e0d37b", back: "#5d4b24", border: "#96853f", detail: "#ac67aa" },
+    curve: "M 46.8 53.6 C 116.3 25.7 167.9 99.3 237.4 84.7", leftPct: -27.4, topPct: -10.0, widthPct: 99.4,
+  },
 ];
 
 export function pickBanner(seed: number): Banner {
@@ -135,11 +156,20 @@ function TitleBanner({ title, c, banner, seed }: { title: string; c: ThemeColors
     }
   }, [title, fontSize]);
 
-  const bannerSrc = useMemo(() => {
-    const [h, s, l] = pickPalette(seed);
-    const mainNew = hslToHex(h, s, l);
-    const backNew = hslToHex(h, s, Math.max(8, l - 18));
-    return svgDataUrl(banner.raw, banner.mainHex, banner.backHex, mainNew, backNew);
+  const { bannerSrc, textFill, textStroke } = useMemo(() => {
+    const d = deriveColors(seed);
+    const { orig } = banner;
+    let svg = banner.raw
+      .replaceAll(orig.main, d.main)
+      .replaceAll(orig.back, d.back)
+      .replaceAll(orig.border, d.border)
+      .replaceAll(orig.detail, d.detail);
+    if (orig.warm) svg = svg.replaceAll(orig.warm, d.warm);
+    return {
+      bannerSrc: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
+      textFill: d.detail,
+      textStroke: d.border,
+    };
   }, [banner, seed]);
 
   return (
@@ -150,7 +180,7 @@ function TitleBanner({ title, c, banner, seed }: { title: string; c: ThemeColors
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
         <defs><path ref={pathRef} id="banner-curve" d={banner.curve} fill="none" /></defs>
         <text ref={textRef} fontFamily="'Playfair Display', serif" fontWeight={700} fontSize={fontSize}
-          fill={banner.textFill} stroke={banner.textStroke} strokeWidth="2.5" paintOrder="stroke fill"
+          fill={textFill} stroke={textStroke} strokeWidth="2.5" paintOrder="stroke fill"
           textAnchor="middle" letterSpacing="0.3">
           <textPath href="#banner-curve" startOffset="50%">{title}</textPath>
         </text>
