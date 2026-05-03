@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "0PDdFmsqwry2UMmQBN2Yc"
+uri = "file://artifacts/mockup-sandbox/public/images/vintage-tomatoes.png"
+type = "image"
+title = "Vintage tomato illustration"
