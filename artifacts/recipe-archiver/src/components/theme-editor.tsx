@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Palette, X, RotateCcw, Save } from "lucide-react";
+import { Palette, X, RotateCcw, Save, Copy } from "lucide-react";
 import { useTheme } from "@/lib/theme-context";
 import { THEME_LABELS, type ThemeColors } from "@/lib/theme";
 
 export function ThemeEditorButton() {
   const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { colors, activeDefault, updateColor, resetTheme, overwriteDefaults } = useTheme();
 
   const keys = Object.keys(THEME_LABELS) as (keyof ThemeColors)[];
@@ -14,6 +15,14 @@ export function ThemeEditorButton() {
     overwriteDefaults();
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
+  };
+
+  const handleCopy = () => {
+    const lines = keys.map(k => `  ${k}: "${colors[k]}",`).join("\n");
+    const text = `{\n${lines}\n}`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -81,6 +90,23 @@ export function ThemeEditorButton() {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            {/* Copy colors for dev */}
+            <button
+              onClick={handleCopy}
+              title="Copy current colors to clipboard"
+              style={{
+                color: copied ? "#7ECE6A" : "#C8A020",
+                opacity: 0.85, cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 4,
+                fontFamily: "'Outfit', sans-serif", fontSize: "0.65rem",
+                background: "transparent", border: "none",
+                transition: "color 0.3s",
+              }}
+              className="hover:opacity-100"
+            >
+              <Copy className="w-3 h-3" />
+              {copied ? "Copied!" : "Copy"}
+            </button>
             {/* Overwrite defaults */}
             <button
               onClick={handleOverwrite}
