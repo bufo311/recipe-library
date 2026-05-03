@@ -15,13 +15,36 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@/lib/theme-context";
 import type { ThemeColors } from "@/lib/theme";
 
-import bannerSvg from "@/assets/banner.svg";
+import bannerSvgRaw from "@/assets/banner.svg?raw";
 
-function TitleBanner({ title, c }: { title: string; c: ThemeColors }) {
+// Original banner palette → keys describe the role; we remap each to a theme color.
+// Locked: parchment ribbon → cream; outlines → ink. Others randomized per-recipe.
+const BANNER_RANDOM_SLOTS = ["#b93c2c", "#292a58", "#bfd7df", "#bbc7b5", "#8d805e", "#4e4622"] as const;
+const RANDOM_POOL: (keyof ThemeColors)[] = ["maroon", "teal", "gold", "rose", "black", "powder", "sage", "parch"];
+
+function seededRng(seed: number) {
+  let s = (seed | 0) >>> 0 || 1;
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 0x100000000;
+  };
+}
+
+function colorizeBanner(svgText: string, c: ThemeColors, seed: number): string {
+  const rand = seededRng(seed);
+  let out = svgText.replaceAll("#f0e6c4", c.cream).replaceAll("#11100d", c.ink);
+  for (const orig of BANNER_RANDOM_SLOTS) {
+    const key = RANDOM_POOL[Math.floor(rand() * RANDOM_POOL.length)];
+    out = out.replaceAll(orig, c[key]);
+  }
+  return out;
+}
+
+function TitleBanner({ title, c, seed }: { title: string; c: ThemeColors; seed: number }) {
   // Curve approximating the cream ribbon's centerline in banner SVG (viewBox 0 0 288 144).
   // Symmetric shallow smile so text dips slightly in the middle to follow the sash.
   const curve = "M 59.8 94.9 C 116.2 109.2 185.1 23.1 237.4 59.6";
@@ -30,6 +53,10 @@ function TitleBanner({ title, c }: { title: string; c: ThemeColors }) {
   const len = title.length;
   const initialSize = len > 36 ? 11 : len > 28 ? 13 : len > 20 ? 15 : len > 12 ? 18 : 22;
   const [fontSize, setFontSize] = useState(initialSize);
+  const bannerUrl = useMemo(() => {
+    const colored = colorizeBanner(bannerSvgRaw, c, seed);
+    return `data:image/svg+xml;utf8,${encodeURIComponent(colored)}`;
+  }, [c, seed]);
   useLayoutEffect(() => {
     setFontSize(initialSize);
   }, [title, initialSize]);
@@ -45,7 +72,7 @@ function TitleBanner({ title, c }: { title: string; c: ThemeColors }) {
   }, [title, fontSize]);
   return (
     <div style={{ position: "relative", width: "100%", aspectRatio: "288 / 144" }}>
-      <img src={bannerSvg} alt="" style={{ width: "100%", height: "100%", display: "block",
+      <img src={bannerUrl} alt="" style={{ width: "100%", height: "100%", display: "block",
         filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.35))" }} />
       <svg viewBox="0 0 288 144" preserveAspectRatio="xMidYMid meet"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
@@ -147,7 +174,7 @@ export default function RecipeDetail() {
             style={{ backgroundColor: c.sage }}>
             {/* Banner: in-flow on mobile (full width, no overhang), absolute BANNER 1 placement on sm+ */}
             <div className="relative w-auto -mx-4 pointer-events-none z-30 mb-3 sm:mx-0 sm:mb-0 sm:absolute sm:left-[-33%] sm:top-[-14.3%] sm:w-[87.5%]">
-              <TitleBanner title={recipe.title} c={c} />
+              <TitleBanner title={recipe.title} c={c} seed={recipe.id} />
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start items-center gap-4 relative">
               <div className="flex-1 order-2 sm:order-1 sm:min-h-[90px]">
