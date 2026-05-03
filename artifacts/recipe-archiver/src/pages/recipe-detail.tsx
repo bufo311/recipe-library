@@ -139,16 +139,15 @@ export default function RecipeDetail() {
           <div style={{ height: 3, backgroundColor: c.rose }} />
 
           {/* Title zone */}
-          <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "visible", minHeight: 320 }}>
+          <div className="relative overflow-visible px-4 sm:px-8 py-6 sm:min-h-[320px]"
+            style={{ backgroundColor: c.sage }}>
             <div style={{ position: "absolute", inset: 0, pointerEvents: "none",
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='2' cy='2' r='0.5' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")` }} />
-            {/* Banner hangs off the left edge, right end stops near card midpoint */}
-            {/* BANNER 1 placement */}
-            <div style={{ position: "absolute", left: "-33.0%", top: "-14.3%", width: "87.5%",
-              pointerEvents: "none", zIndex: 3 }}>
+            {/* Banner: in-flow on mobile (full width, no overhang), absolute BANNER 1 placement on sm+ */}
+            <div className="relative w-full pointer-events-none z-30 mb-3 sm:mb-0 sm:absolute sm:left-[-33%] sm:top-[-14.3%] sm:w-[87.5%]">
               <TitleBanner title={recipe.title} c={c} />
             </div>
-            <div className="flex justify-between items-start gap-4 relative">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start items-center gap-4 relative">
               <div className="flex-1" style={{ minHeight: 90 }}>
                 {recipe.sourceUrl && (
                   <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
