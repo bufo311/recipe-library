@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme-context";
 import { LabelFrame } from "@/components/label-frame";
@@ -10,6 +10,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError]       = useState<string | null>(null);
   const [loading, setLoading]   = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+  const card = isMobile
+    ? { top: "30%", left: "52%", width: "57%", scaleY: 1.04 }
+    : { top: "31%", left: "52%", width: "57%", scaleY: 1.19 };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,11 +37,11 @@ export default function LoginPage() {
         {/* Card sits BEHIND the SVG — visible through the transparent mouth */}
         <div style={{
           position: "absolute",
-          top: "31%",
-          left: "52%",
-          transform: "translateX(-50%) scaleY(1.19)",
+          top: card.top,
+          left: card.left,
+          transform: `translateX(-50%) scaleY(${card.scaleY})`,
           transformOrigin: "top center",
-          width: "57%",
+          width: card.width,
           zIndex: 1,
         }}>
           <LabelFrame className="w-full" variant={0}>
