@@ -8,14 +8,14 @@ const C = {
 };
 
 type Pos = { leftPct: number; topPct: number; widthPct: number };
-type CurvePts = { x1: number; y1: number; cx: number; cy: number; x2: number; y2: number };
+type CurvePts = { x1: number; y1: number; cx1: number; cy1: number; cx2: number; cy2: number; x2: number; y2: number };
 
 export function BannerPlayground() {
   const cardRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [pos, setPos] = useState<Pos>({ leftPct: -12, topPct: -18, widthPct: 70 });
-  const [curve, setCurve] = useState<CurvePts>({ x1: 78, y1: 76, cx: 172, cy: 96, x2: 266, y2: 76 });
-  const [dragging, setDragging] = useState<null | "move" | "resize" | "p1" | "pc" | "p2" | "curve">(null);
+  const [curve, setCurve] = useState<CurvePts>({ x1: 78, y1: 76, cx1: 125, cy1: 96, cx2: 219, cy2: 96, x2: 266, y2: 76 });
+  const [dragging, setDragging] = useState<null | "move" | "resize" | "p1" | "pc1" | "pc2" | "p2" | "curve">(null);
   const dragStart = useRef<{ mx: number; my: number; pos: Pos; curve: CurvePts } | null>(null);
 
   useEffect(() => {
@@ -40,13 +40,16 @@ export function BannerPlayground() {
           widthPct: Math.max(20, Math.min(150, dragStart.current.pos.widthPct + dxPct)) });
       } else if (dragging === "p1") {
         setCurve({ ...cs, x1: cs.x1 + dxSvg, y1: cs.y1 + dySvg });
-      } else if (dragging === "pc") {
-        setCurve({ ...cs, cx: cs.cx + dxSvg, cy: cs.cy + dySvg });
+      } else if (dragging === "pc1") {
+        setCurve({ ...cs, cx1: cs.cx1 + dxSvg, cy1: cs.cy1 + dySvg });
+      } else if (dragging === "pc2") {
+        setCurve({ ...cs, cx2: cs.cx2 + dxSvg, cy2: cs.cy2 + dySvg });
       } else if (dragging === "p2") {
         setCurve({ ...cs, x2: cs.x2 + dxSvg, y2: cs.y2 + dySvg });
       } else if (dragging === "curve") {
         setCurve({ x1: cs.x1 + dxSvg, y1: cs.y1 + dySvg,
-          cx: cs.cx + dxSvg, cy: cs.cy + dySvg,
+          cx1: cs.cx1 + dxSvg, cy1: cs.cy1 + dySvg,
+          cx2: cs.cx2 + dxSvg, cy2: cs.cy2 + dySvg,
           x2: cs.x2 + dxSvg, y2: cs.y2 + dySvg });
       }
     }
@@ -64,7 +67,7 @@ export function BannerPlayground() {
     setDragging(kind);
   }
 
-  const curvePath = `M ${curve.x1.toFixed(1)} ${curve.y1.toFixed(1)} Q ${curve.cx.toFixed(1)} ${curve.cy.toFixed(1)} ${curve.x2.toFixed(1)} ${curve.y2.toFixed(1)}`;
+  const curvePath = `M ${curve.x1.toFixed(1)} ${curve.y1.toFixed(1)} C ${curve.cx1.toFixed(1)} ${curve.cy1.toFixed(1)} ${curve.cx2.toFixed(1)} ${curve.cy2.toFixed(1)} ${curve.x2.toFixed(1)} ${curve.y2.toFixed(1)}`;
   const title = "Classic Chocolate Chip Cookie";
   const fontSize = title.length > 28 ? 13 : title.length > 20 ? 15 : 18;
 
@@ -120,11 +123,18 @@ export function BannerPlayground() {
                   onMouseDown={(e) => startDrag(e, "curve")} />
                 <path d={curvePath} stroke="rgba(255,0,0,0.5)" strokeWidth="0.6" fill="none"
                   strokeDasharray="2 2" style={{ pointerEvents: "none" }} />
+                {/* Tangent guide lines from endpoints to their control points */}
+                <line x1={curve.x1} y1={curve.y1} x2={curve.cx1} y2={curve.cy1}
+                  stroke="rgba(34,197,94,0.5)" strokeWidth="0.4" strokeDasharray="1 1" style={{ pointerEvents: "none" }} />
+                <line x1={curve.x2} y1={curve.y2} x2={curve.cx2} y2={curve.cy2}
+                  stroke="rgba(34,197,94,0.5)" strokeWidth="0.4" strokeDasharray="1 1" style={{ pointerEvents: "none" }} />
                 {/* Endpoint and control handles */}
                 <circle cx={curve.x1} cy={curve.y1} r={3.5} fill="#3b82f6" stroke="white" strokeWidth="0.8"
                   style={{ cursor: "grab", pointerEvents: "all" }} onMouseDown={(e) => startDrag(e, "p1")} />
-                <circle cx={curve.cx} cy={curve.cy} r={3.5} fill="#22c55e" stroke="white" strokeWidth="0.8"
-                  style={{ cursor: "grab", pointerEvents: "all" }} onMouseDown={(e) => startDrag(e, "pc")} />
+                <circle cx={curve.cx1} cy={curve.cy1} r={3.5} fill="#22c55e" stroke="white" strokeWidth="0.8"
+                  style={{ cursor: "grab", pointerEvents: "all" }} onMouseDown={(e) => startDrag(e, "pc1")} />
+                <circle cx={curve.cx2} cy={curve.cy2} r={3.5} fill="#22c55e" stroke="white" strokeWidth="0.8"
+                  style={{ cursor: "grab", pointerEvents: "all" }} onMouseDown={(e) => startDrag(e, "pc2")} />
                 <circle cx={curve.x2} cy={curve.y2} r={3.5} fill="#3b82f6" stroke="white" strokeWidth="0.8"
                   style={{ cursor: "grab", pointerEvents: "all" }} onMouseDown={(e) => startDrag(e, "p2")} />
               </svg>
