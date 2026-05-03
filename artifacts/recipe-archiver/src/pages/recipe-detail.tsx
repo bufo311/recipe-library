@@ -95,15 +95,17 @@ type Banner = {
   raw: string;
   mainHex: string;
   backHex: string;
+  textFill: string;
+  textStroke: string;
   curve: string;
   leftPct: number;
   topPct: number;
   widthPct: number;
 };
 const BANNERS: Banner[] = [
-  { raw: banner1Raw, mainHex: "#b6402f", backHex: "#5c5637", curve: "M 61.8 91.6 C 118.2 103.8 187.1 19.8 239.4 56.3", leftPct: -26.7, topPct: -14.7, widthPct: 94.2 },
-  { raw: banner2Raw, mainHex: "#53996e", backHex: "#215741", curve: "M 45.4 90.4 C 110.0 118.6 177.3 60.9 238.0 68.7", leftPct: -24.6, topPct: -21.9, widthPct: 96.1 },
-  { raw: banner3Raw, mainHex: "#e0d37b", backHex: "#5d4b24", curve: "M 46.8 53.6 C 116.3 25.7 167.9 99.3 237.4 84.7", leftPct: -27.4, topPct: -10.0, widthPct: 99.4 },
+  { raw: banner1Raw, mainHex: "#b6402f", backHex: "#5c5637", textFill: "#b5c0af", textStroke: "#908365", curve: "M 61.8 91.6 C 118.2 103.8 187.1 19.8 239.4 56.3", leftPct: -26.7, topPct: -14.7, widthPct: 94.2 },
+  { raw: banner2Raw, mainHex: "#53996e", backHex: "#215741", textFill: "#66867f", textStroke: "#cb5f4f", curve: "M 45.4 90.4 C 110.0 118.6 177.3 60.9 238.0 68.7", leftPct: -24.6, topPct: -21.9, widthPct: 96.1 },
+  { raw: banner3Raw, mainHex: "#e0d37b", backHex: "#5d4b24", textFill: "#ac67aa", textStroke: "#96853f", curve: "M 46.8 53.6 C 116.3 25.7 167.9 99.3 237.4 84.7", leftPct: -27.4, topPct: -10.0, widthPct: 99.4 },
 ];
 
 export function pickBanner(seed: number): Banner {
@@ -147,7 +149,8 @@ function TitleBanner({ title, c, banner, seed }: { title: string; c: ThemeColors
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
         <defs><path ref={pathRef} id="banner-curve" d={banner.curve} fill="none" /></defs>
         <text ref={textRef} fontFamily="'Playfair Display', serif" fontWeight={700} fontSize={fontSize}
-          fill={c.ink} textAnchor="middle" letterSpacing="0.3">
+          fill={banner.textFill} stroke={banner.textStroke} strokeWidth="2.5" paintOrder="stroke fill"
+          textAnchor="middle" letterSpacing="0.3">
           <textPath href="#banner-curve" startOffset="50%">{title}</textPath>
         </text>
       </svg>
