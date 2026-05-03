@@ -10,11 +10,14 @@ const C = {
 type Pos = { leftPct: number; topPct: number; widthPct: number };
 type CurvePts = { x1: number; y1: number; cx1: number; cy1: number; cx2: number; cy2: number; x2: number; y2: number };
 
+const DEFAULT_POS: Pos = { leftPct: -12, topPct: -18, widthPct: 70 };
+const DEFAULT_CURVE: CurvePts = { x1: 78, y1: 76, cx1: 125, cy1: 96, cx2: 219, cy2: 96, x2: 266, y2: 76 };
+
 export function BannerPlayground() {
   const cardRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [pos, setPos] = useState<Pos>({ leftPct: -12, topPct: -18, widthPct: 70 });
-  const [curve, setCurve] = useState<CurvePts>({ x1: 78, y1: 76, cx1: 125, cy1: 96, cx2: 219, cy2: 96, x2: 266, y2: 76 });
+  const [pos, setPos] = useState<Pos>(DEFAULT_POS);
+  const [curve, setCurve] = useState<CurvePts>(DEFAULT_CURVE);
   const [dragging, setDragging] = useState<null | "move" | "resize" | "p1" | "pc1" | "pc2" | "p2" | "curve">(null);
   const dragStart = useRef<{ mx: number; my: number; pos: Pos; curve: CurvePts } | null>(null);
 
@@ -76,7 +79,15 @@ export function BannerPlayground() {
       {/* Live readout */}
       <div style={{ background: C.cream, border: `2px solid ${C.ink}`, padding: "12px 16px",
         fontFamily: "monospace", fontSize: 13, lineHeight: 1.6, color: C.ink }}>
-        <div style={{ fontWeight: 700, marginBottom: 6 }}>📋 Tell the agent these values:</div>
+        <div style={{ fontWeight: 700, marginBottom: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>📋 Tell the agent these values:</span>
+          <button
+            onClick={() => { setPos(DEFAULT_POS); setCurve(DEFAULT_CURVE); }}
+            style={{ background: C.maroon, color: C.cream, border: `2px solid ${C.ink}`,
+              padding: "4px 12px", fontFamily: "monospace", fontSize: 12, cursor: "pointer", fontWeight: 700 }}>
+            ↺ Reset
+          </button>
+        </div>
         <div>left: <b>{pos.leftPct.toFixed(1)}%</b> &nbsp; top: <b>{pos.topPct.toFixed(1)}%</b> &nbsp; width: <b>{pos.widthPct.toFixed(1)}%</b></div>
         <div>curve: <b>"{curvePath}"</b></div>
         <div style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}>
