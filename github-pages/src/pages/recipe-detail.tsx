@@ -287,15 +287,7 @@ export default function RecipeDetail() {
               );
             })()}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start items-center gap-4 relative">
-              <div className="flex-1 order-2 sm:order-1 sm:min-h-[90px]">
-                {recipe.sourceUrl && (
-                  <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 sm:absolute sm:bottom-0 sm:left-0"
-                    style={{ fontSize: "0.72rem", color: c.gold, fontFamily: "'Outfit', sans-serif", opacity: 0.85 }}>
-                    Original Source <ExternalLink className="h-3 w-3" />
-                  </a>
-                )}
-              </div>
+              <div className="flex-1 order-2 sm:order-1 sm:min-h-[90px]" />
               <div className="flex flex-col items-center sm:items-end gap-3 shrink-0 order-1 sm:order-2">
                 {sealLines.length > 0 && <WaxSeal lines={sealLines} c={c} />}
                 <div className="flex gap-2 mt-1">
@@ -327,6 +319,13 @@ export default function RecipeDetail() {
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
+                {recipe.sourceUrl && (
+                  <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1"
+                    style={{ fontSize: "0.68rem", color: c.gold, fontFamily: "'Outfit', sans-serif", opacity: 0.8 }}>
+                    Original Source <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
               </div>
             </div>
           </div>
