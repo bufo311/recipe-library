@@ -15,7 +15,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useTheme } from "@/lib/theme-context";
 import type { ThemeColors } from "@/lib/theme";
 
@@ -25,16 +25,32 @@ function TitleBanner({ title, c }: { title: string; c: ThemeColors }) {
   // Curve approximating the cream ribbon's centerline in banner SVG (viewBox 0 0 288 144).
   // Symmetric shallow smile so text dips slightly in the middle to follow the sash.
   const curve = "M 59.8 94.9 C 116.2 109.2 185.1 23.1 237.4 59.6";
+  const pathRef = useRef<SVGPathElement>(null);
+  const textRef = useRef<SVGTextElement>(null);
   const len = title.length;
-  const fontSize = len > 36 ? 11 : len > 28 ? 13 : len > 20 ? 15 : len > 12 ? 18 : 22;
+  const initialSize = len > 36 ? 11 : len > 28 ? 13 : len > 20 ? 15 : len > 12 ? 18 : 22;
+  const [fontSize, setFontSize] = useState(initialSize);
+  useLayoutEffect(() => {
+    setFontSize(initialSize);
+  }, [title, initialSize]);
+  useLayoutEffect(() => {
+    const path = pathRef.current;
+    const text = textRef.current;
+    if (!path || !text) return;
+    const max = path.getTotalLength() * 0.92;
+    const w = text.getComputedTextLength();
+    if (w > max && fontSize > 6) {
+      setFontSize((s) => Math.max(6, s * (max / w)));
+    }
+  }, [title, fontSize]);
   return (
     <div style={{ position: "relative", width: "100%", aspectRatio: "288 / 144" }}>
       <img src={bannerSvg} alt="" style={{ width: "100%", height: "100%", display: "block",
         filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.35))" }} />
       <svg viewBox="0 0 288 144" preserveAspectRatio="xMidYMid meet"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
-        <defs><path id="banner-curve" d={curve} fill="none" /></defs>
-        <text fontFamily="'Playfair Display', serif" fontWeight={700} fontSize={fontSize}
+        <defs><path ref={pathRef} id="banner-curve" d={curve} fill="none" /></defs>
+        <text ref={textRef} fontFamily="'Playfair Display', serif" fontWeight={700} fontSize={fontSize}
           fill={c.ink} textAnchor="middle" letterSpacing="0.3">
           <textPath href="#banner-curve" startOffset="50%">{title}</textPath>
         </text>
