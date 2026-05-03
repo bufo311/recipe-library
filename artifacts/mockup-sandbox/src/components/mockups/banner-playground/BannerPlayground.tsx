@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import bannerSvg from "./banner.svg";
+import banner1Svg from "./banner-1.svg";
+import banner2Svg from "./banner-2.svg";
+import banner3Svg from "./banner-3.svg";
 
 const C = {
   parch: "#f0e6c4", cream: "#faf5e1", sage: "#5a7355", teal: "#2e6263",
@@ -9,17 +11,41 @@ const C = {
 
 type Pos = { leftPct: number; topPct: number; widthPct: number };
 type CurvePts = { x1: number; y1: number; cx1: number; cy1: number; cx2: number; cy2: number; x2: number; y2: number };
+type BannerState = { pos: Pos; curve: CurvePts };
 
-const DEFAULT_POS: Pos = { leftPct: -12, topPct: -18, widthPct: 70 };
-const DEFAULT_CURVE: CurvePts = { x1: 78, y1: 76, cx1: 125, cy1: 96, cx2: 219, cy2: 96, x2: 266, y2: 76 };
+const BANNERS = [
+  { label: "Banner 1", src: banner1Svg },
+  { label: "Banner 2", src: banner2Svg },
+  { label: "Banner 3", src: banner3Svg },
+];
+
+const DEFAULT_POS: Pos = { leftPct: -33, topPct: -14.3, widthPct: 87.5 };
+const DEFAULT_CURVE_1: CurvePts = { x1: 59.8, y1: 94.9, cx1: 116.2, cy1: 109.2, cx2: 185.1, cy2: 23.1, x2: 237.4, y2: 59.6 };
+const DEFAULT_CURVE_FLAT: CurvePts = { x1: 50, y1: 72, cx1: 110, cy1: 72, cx2: 178, cy2: 72, x2: 238, y2: 72 };
+
+const DEFAULT_STATES: BannerState[] = [
+  { pos: { ...DEFAULT_POS }, curve: { ...DEFAULT_CURVE_1 } },
+  { pos: { ...DEFAULT_POS }, curve: { ...DEFAULT_CURVE_FLAT } },
+  { pos: { ...DEFAULT_POS }, curve: { ...DEFAULT_CURVE_FLAT } },
+];
 
 export function BannerPlayground() {
   const cardRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [pos, setPos] = useState<Pos>(DEFAULT_POS);
-  const [curve, setCurve] = useState<CurvePts>(DEFAULT_CURVE);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [states, setStates] = useState<BannerState[]>(() => DEFAULT_STATES.map(s => ({ pos: { ...s.pos }, curve: { ...s.curve } })));
   const [dragging, setDragging] = useState<null | "move" | "resize" | "p1" | "pc1" | "pc2" | "p2" | "curve">(null);
   const dragStart = useRef<{ mx: number; my: number; pos: Pos; curve: CurvePts } | null>(null);
+
+  const active = states[activeIdx];
+  const pos = active.pos;
+  const curve = active.curve;
+
+  function updateActive(updater: (s: BannerState) => BannerState) {
+    setStates(prev => prev.map((s, i) => (i === activeIdx ? updater(s) : s)));
+  }
+  function setPos(next: Pos) { updateActive(s => ({ ...s, pos: next })); }
+  function setCurve(next: CurvePts) { updateActive(s => ({ ...s, curve: next })); }
 
   useEffect(() => {
     function onMove(e: MouseEvent) {
@@ -29,7 +55,6 @@ export function BannerPlayground() {
       const dy = e.clientY - dragStart.current.my;
       const dxPct = (dx / rect.width) * 100;
       const dyPct = (dy / rect.height) * 100;
-      // For curve handles, convert pixel delta → SVG viewBox units (288 wide).
       const svgEl = svgRef.current;
       const svgRect = svgEl?.getBoundingClientRect();
       const dxSvg = svgRect ? (dx / svgRect.width) * 288 : 0;
@@ -57,12 +82,11 @@ export function BannerPlayground() {
       }
     }
     function onUp() { setDragging(null); dragStart.current = null; }
-    if (dragging) {
-      window.addEventListener("mousemove", onMove);
-      window.addEventListener("mouseup", onUp);
-      return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
-    }
-  }, [dragging]);
+    if (!dragging) return;
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+  }, [dragging, activeIdx]);
 
   function startDrag(e: React.MouseEvent, kind: NonNullable<typeof dragging>) {
     e.preventDefault(); e.stopPropagation();
@@ -76,16 +100,31 @@ export function BannerPlayground() {
 
   return (
     <div className="min-h-screen p-8 flex flex-col gap-4" style={{ background: C.powder, fontFamily: "system-ui, sans-serif" }}>
+      {/* Banner switcher */}
+      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+        {BANNERS.map((b, i) => (
+          <button key={i} onClick={() => setActiveIdx(i)}
+            style={{
+              background: i === activeIdx ? C.maroon : C.cream,
+              color: i === activeIdx ? C.cream : C.ink,
+              border: `2px solid ${C.ink}`, padding: "8px 16px",
+              fontFamily: "monospace", fontSize: 13, fontWeight: 700, cursor: "pointer",
+            }}>
+            {b.label}
+          </button>
+        ))}
+      </div>
+
       {/* Live readout */}
       <div style={{ background: C.cream, border: `2px solid ${C.ink}`, padding: "12px 16px",
         fontFamily: "monospace", fontSize: 13, lineHeight: 1.6, color: C.ink }}>
         <div style={{ fontWeight: 700, marginBottom: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>📋 Tell the agent these values:</span>
+          <span>📋 Editing {BANNERS[activeIdx].label} — values for the agent:</span>
           <button
-            onClick={() => { setPos(DEFAULT_POS); setCurve(DEFAULT_CURVE); }}
+            onClick={() => updateActive(() => ({ pos: { ...DEFAULT_STATES[activeIdx].pos }, curve: { ...DEFAULT_STATES[activeIdx].curve } }))}
             style={{ background: C.maroon, color: C.cream, border: `2px solid ${C.ink}`,
               padding: "4px 12px", fontFamily: "monospace", fontSize: 12, cursor: "pointer", fontWeight: 700 }}>
-            ↺ Reset
+            ↺ Reset this banner
           </button>
         </div>
         <div>left: <b>{pos.leftPct.toFixed(1)}%</b> &nbsp; top: <b>{pos.topPct.toFixed(1)}%</b> &nbsp; width: <b>{pos.widthPct.toFixed(1)}%</b></div>
@@ -118,7 +157,7 @@ export function BannerPlayground() {
               userSelect: "none",
             }}>
             <div style={{ position: "relative", width: "100%", aspectRatio: "288 / 144", pointerEvents: "none" }}>
-              <img src={bannerSvg} alt="" draggable={false}
+              <img src={BANNERS[activeIdx].src} alt="" draggable={false}
                 style={{ width: "100%", height: "100%", display: "block",
                   filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.35))" }} />
               <svg ref={svgRef} viewBox="0 0 288 144" preserveAspectRatio="xMidYMid meet"
