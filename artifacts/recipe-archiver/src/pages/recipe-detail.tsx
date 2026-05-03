@@ -127,7 +127,8 @@ export default function RecipeDetail() {
             <div style={{ position: "absolute", inset: 0, pointerEvents: "none",
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='2' cy='2' r='0.5' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")` }} />
             {/* Banner hangs off the left edge, right end stops near card midpoint */}
-            <div style={{ position: "absolute", left: "-29.5%", top: "-28.2%", width: "87.5%",
+            {/* BANNER 1 placement */}
+            <div style={{ position: "absolute", left: "-33.0%", top: "-14.3%", width: "87.5%",
               pointerEvents: "none", zIndex: 3 }}>
               <TitleBanner title={recipe.title} c={c} />
             </div>
