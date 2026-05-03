@@ -28,9 +28,10 @@ export default function LoginPage() {
         {/* Card sits BEHIND the SVG — visible through the transparent mouth */}
         <div style={{
           position: "absolute",
-          top: "40%",
-          left: "50%",
-          transform: "translateX(-50%)",
+          top: "31%",
+          left: "52%",
+          transform: "translateX(-50%) scaleY(1.19)",
+          transformOrigin: "top center",
           width: "57%",
           zIndex: 1,
         }}>
