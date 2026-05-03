@@ -15,31 +15,105 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@/lib/theme-context";
 import type { ThemeColors } from "@/lib/theme";
 
-import banner1Svg from "@/assets/banner-1.svg";
-import banner2Svg from "@/assets/banner-2.svg";
-import banner3Svg from "@/assets/banner-3.svg";
+import banner1Raw from "@/assets/banner-1.svg?raw";
+import banner2Raw from "@/assets/banner-2.svg?raw";
+import banner3Raw from "@/assets/banner-3.svg?raw";
 
-// Per-banner text-curve and sm+ overhang placement (viewBox 0 0 288 144).
-// To add a new banner, append an entry and it'll automatically join the rotation.
-type Banner = { src: string; curve: string; leftPct: number; topPct: number; widthPct: number };
+// ---------------------------------------------------------------------------
+// Banner colour palette — 100 curated Victorian hues as [h, s, l].
+// Back colour is automatically derived as same h+s but l-18 (darker fold).
+// ---------------------------------------------------------------------------
+const PALETTE: readonly [number, number, number][] = [
+  // Crimsons & reds
+  [0,65,38],[0,75,32],[5,68,40],[8,72,35],[12,65,38],[15,60,40],
+  // Russet & terracotta
+  [20,70,38],[25,72,40],[28,68,40],[32,75,38],[36,70,40],[40,72,38],
+  // Amber & gold
+  [42,72,40],[46,70,42],[50,68,40],[54,65,42],[58,62,42],
+  // Yellow-green & chartreuse
+  [62,55,40],[68,52,40],[74,55,38],[80,50,40],
+  // Sage & mid-greens
+  [90,48,38],[100,52,36],[110,55,36],[118,52,35],[125,55,33],[130,58,33],
+  [138,55,33],[145,52,35],[150,58,33],
+  // Dark forest greens
+  [95,55,28],[120,60,26],[140,58,28],
+  // Teals
+  [158,55,35],[162,58,33],[168,60,32],[174,58,35],[178,62,32],[183,60,35],
+  // Cerulean & aqua
+  [188,58,38],[193,60,38],[198,62,40],[202,58,42],
+  // Blues
+  [206,58,40],[212,62,40],[218,65,40],[222,62,42],[228,60,42],
+  [234,62,40],[238,60,40],[242,58,42],
+  // Deep navy
+  [215,70,28],[225,72,28],[232,68,30],
+  // Blue-purples
+  [246,52,42],[250,55,42],[254,52,42],[258,50,42],
+  // Purples & violets
+  [262,48,42],[267,52,40],[272,55,40],[276,52,42],[280,48,42],[284,52,40],
+  // Mauves & orchids
+  [288,46,42],[293,48,40],[298,50,40],[302,48,42],[306,45,42],
+  // Roses & pinks
+  [312,52,38],[318,55,38],[324,58,40],[330,55,40],[336,55,40],
+  [342,58,40],[348,60,40],[354,62,40],
+  // Deep plum & burgundy
+  [300,55,28],[320,58,30],[340,62,28],[350,65,30],
+  // Muted / dusty variants (lower saturation — more faded Victorian feel)
+  [0,42,46],[30,40,46],[65,38,44],[120,38,42],[180,42,40],
+  [210,40,44],[260,38,44],[310,40,44],
+  // Extra warm neutrals
+  [22,55,42],[35,52,44],[48,58,40],[72,48,40],[155,45,38],
+  [195,50,40],[235,50,42],[275,44,42],[325,48,42],[345,52,42],
+];
+
+function hslToHex(h: number, s: number, l: number): string {
+  s /= 100; l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const c = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * c).toString(16).padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function pickPalette(seed: number): [number, number, number] {
+  const s = ((seed | 0) >>> 0) || 1;
+  // Different LCG step from pickBanner so shape and colour are independent.
+  const mixed = (Math.imul(s, 2246822519) + 1823119183) >>> 0;
+  return PALETTE[mixed % PALETTE.length];
+}
+
+function svgDataUrl(raw: string, mainOrig: string, backOrig: string, mainNew: string, backNew: string): string {
+  const recolored = raw.replaceAll(mainOrig, mainNew).replaceAll(backOrig, backNew);
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(recolored)}`;
+}
+
+type Banner = {
+  raw: string;
+  mainHex: string;
+  backHex: string;
+  curve: string;
+  leftPct: number;
+  topPct: number;
+  widthPct: number;
+};
 const BANNERS: Banner[] = [
-  { src: banner1Svg, curve: "M 61.8 91.6 C 118.2 103.8 187.1 19.8 239.4 56.3", leftPct: -26.7, topPct: -14.7, widthPct: 94.2 },
-  { src: banner2Svg, curve: "M 45.4 90.4 C 110.0 118.6 177.3 60.9 238.0 68.7", leftPct: -24.6, topPct: -21.9, widthPct: 96.1 },
-  { src: banner3Svg, curve: "M 46.8 53.6 C 116.3 25.7 167.9 99.3 237.4 84.7", leftPct: -27.4, topPct: -10.0, widthPct: 99.4 },
+  { raw: banner1Raw, mainHex: "#b6402f", backHex: "#5c5637", curve: "M 61.8 91.6 C 118.2 103.8 187.1 19.8 239.4 56.3", leftPct: -26.7, topPct: -14.7, widthPct: 94.2 },
+  { raw: banner2Raw, mainHex: "#53996e", backHex: "#215741", curve: "M 45.4 90.4 C 110.0 118.6 177.3 60.9 238.0 68.7", leftPct: -24.6, topPct: -21.9, widthPct: 96.1 },
+  { raw: banner3Raw, mainHex: "#e0d37b", backHex: "#5d4b24", curve: "M 46.8 53.6 C 116.3 25.7 167.9 99.3 237.4 84.7", leftPct: -27.4, topPct: -10.0, widthPct: 99.4 },
 ];
 
 export function pickBanner(seed: number): Banner {
   const s = ((seed | 0) >>> 0) || 1;
-  // Single-step LCG to spread sequential ids across banner choices.
   const mixed = (Math.imul(s, 1664525) + 1013904223) >>> 0;
   return BANNERS[mixed % BANNERS.length];
 }
 
-function TitleBanner({ title, c, banner }: { title: string; c: ThemeColors; banner: Banner }) {
+function TitleBanner({ title, c, banner, seed }: { title: string; c: ThemeColors; banner: Banner; seed: number }) {
   const pathRef = useRef<SVGPathElement>(null);
   const textRef = useRef<SVGTextElement>(null);
   const len = title.length;
@@ -58,9 +132,17 @@ function TitleBanner({ title, c, banner }: { title: string; c: ThemeColors; bann
       setFontSize((s) => Math.max(6, s * (max / w)));
     }
   }, [title, fontSize]);
+
+  const bannerSrc = useMemo(() => {
+    const [h, s, l] = pickPalette(seed);
+    const mainNew = hslToHex(h, s, l);
+    const backNew = hslToHex(h, s, Math.max(8, l - 18));
+    return svgDataUrl(banner.raw, banner.mainHex, banner.backHex, mainNew, backNew);
+  }, [banner, seed]);
+
   return (
     <div style={{ position: "relative", width: "100%", aspectRatio: "288 / 144" }}>
-      <img src={banner.src} alt="" style={{ width: "100%", height: "100%", display: "block",
+      <img src={bannerSrc} alt="" style={{ width: "100%", height: "100%", display: "block",
         filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.35))" }} />
       <svg viewBox="0 0 288 144" preserveAspectRatio="xMidYMid meet"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
@@ -167,7 +249,7 @@ export default function RecipeDetail() {
                 <div
                   className="relative w-auto -mx-4 pointer-events-none z-30 mb-3 sm:mx-0 sm:mb-0 sm:absolute sm:left-[var(--bnr-l)] sm:top-[var(--bnr-t)] sm:w-[var(--bnr-w)]"
                   style={{ "--bnr-l": `${banner.leftPct}%`, "--bnr-t": `${banner.topPct}%`, "--bnr-w": `${banner.widthPct}%` } as React.CSSProperties}>
-                  <TitleBanner title={recipe.title} c={c} banner={banner} />
+                  <TitleBanner title={recipe.title} c={c} banner={banner} seed={recipe.id} />
                 </div>
               );
             })()}
