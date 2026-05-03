@@ -20,22 +20,23 @@ import { useTheme } from "@/lib/theme-context";
 import type { ThemeColors } from "@/lib/theme";
 
 function WaxSeal({ lines, c }: { lines: string[]; c: ThemeColors }) {
-  if (!lines.length) return null;
+  const shown = lines.slice(0, 2);
+  if (!shown.length) return null;
+  const longest = Math.max(...shown.map((l) => l.length));
+  const fontSize = longest > 8 ? "0.46rem" : longest > 6 ? "0.52rem" : "0.6rem";
   return (
     <div style={{
       backgroundColor: c.maroon, color: c.cream, borderRadius: "50%",
-      width: 84, height: 84, display: "flex", alignItems: "center", justifyContent: "center",
-      textAlign: "center", fontSize: "0.56rem", lineHeight: 1.3, textTransform: "uppercase",
-      letterSpacing: "1px", boxShadow: "inset 0 0 14px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.4)",
+      width: 84, height: 84, display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", textAlign: "center",
+      fontSize, lineHeight: 1.15, textTransform: "uppercase", letterSpacing: "0.5px",
+      boxShadow: "inset 0 0 14px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.4)",
       border: `3px solid rgba(0,0,0,0.4)`, outline: `2px solid ${c.gold}`, outlineOffset: -7,
       transform: "rotate(-10deg)", fontWeight: "bold",
-      fontFamily: "'Playfair Display', serif", padding: "0.5rem", flexShrink: 0,
+      fontFamily: "'Playfair Display', serif", padding: "0.35rem", flexShrink: 0,
+      overflow: "hidden",
     }}>
-      {lines.map((l, i) => (
-        <span key={i}>
-          {i > 0 && <><br /><span style={{ opacity: 0.5 }}>&amp;</span><br /></>}{l}
-        </span>
-      ))}
+      {shown.map((l, i) => (<span key={i} style={{ display: "block" }}>{l}</span>))}
     </div>
   );
 }
