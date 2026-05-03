@@ -24,7 +24,7 @@ import bannerSvg from "@/assets/banner.svg";
 function TitleBanner({ title, c }: { title: string; c: ThemeColors }) {
   // Curve approximating the cream ribbon's centerline in banner SVG (viewBox 0 0 288 144).
   // Symmetric shallow smile so text dips slightly in the middle to follow the sash.
-  const curve = "M 78 76 Q 172 96 266 76";
+  const curve = "M 59.8 94.9 C 116.2 109.2 185.1 23.1 237.4 59.6";
   const len = title.length;
   const fontSize = len > 36 ? 11 : len > 28 ? 13 : len > 20 ? 15 : len > 12 ? 18 : 22;
   return (
@@ -129,7 +129,7 @@ export default function RecipeDetail() {
           {/* Title zone */}
           <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "visible", minHeight: 170 }}>
             {/* Banner hangs off the left edge, right end stops near card midpoint */}
-            <div style={{ position: "absolute", left: "-12%", top: "-18%", width: "70%",
+            <div style={{ position: "absolute", left: "-29.5%", top: "-28.2%", width: "87.5%",
               pointerEvents: "none", zIndex: 3 }}>
               <TitleBanner title={recipe.title} c={c} />
             </div>
