@@ -72,5 +72,8 @@ export function makePatterns(c: ThemeColors) {
     cableTeal: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Crect width='20' height='10' fill='${enc(c.teal)}'/%3E%3Cpath d='M0 5 Q5 1 10 5 Q15 9 20 5' fill='none' stroke='${enc(c.cream)}' stroke-width='0.9' opacity='0.35'/%3E%3Cpath d='M0 5 Q5 9 10 5 Q15 1 20 5' fill='none' stroke='${enc(c.cream)}' stroke-width='0.9' opacity='0.35'/%3E%3C/svg%3E")`,
     chevronGold: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Crect width='16' height='8' fill='${enc(c.gold)}'/%3E%3Cpath d='M0 4 L4 1 L8 4 L12 1 L16 4 L12 7 L8 4 L4 7 Z' fill='none' stroke='${enc(c.black)}' stroke-width='0.7' opacity='0.35'/%3E%3C/svg%3E")`,
     powderTile: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Crect width='20' height='20' fill='${enc(c.powder)}'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='none' stroke='${enc(c.teal)}' stroke-width='0.6' opacity='0.4'/%3E%3Cpath d='M10 3 L10 17 M3 10 L17 10' stroke='${enc(c.teal)}' stroke-width='0.4' opacity='0.2'/%3E%3C/svg%3E")`,
+    /** 18×18 square tile — touching-diamond chain, identical in X and Y.
+     *  Use for LabelFrame side strips so all 4 borders look the same. */
+    diamondBorder: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.black)}'/%3E%3Cpolygon points='9%2C0 18%2C9 9%2C18 0%2C9' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cpolygon points='9%2C3 15%2C9 9%2C15 3%2C9' fill='${enc(c.gold)}' opacity='0.22'/%3E%3Ccircle cx='9' cy='9' r='2' fill='${enc(c.gold)}' opacity='0.5'/%3E%3C/svg%3E")`,
   };
 }

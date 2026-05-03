@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Layout } from "@/components/layout";
+import { LabelFrame } from "@/components/label-frame";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -96,27 +97,22 @@ export default function Reference() {
       <div className="container mx-auto px-4 py-10 max-w-3xl">
 
         {/* Page title */}
-        <div style={{ border: `2px solid ${c.black}`, marginBottom: 28 }}>
-          <div style={{ height: 12, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x" }} />
+        <LabelFrame style={{ marginBottom: 28 }}>
           <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />
           <div style={{ height: 3, backgroundColor: c.rose }} />
           <div style={{ backgroundColor: c.sage, padding: "0.75rem 1.5rem", borderBottom: `3px solid ${c.black}` }}>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "2rem",
               fontWeight: 900, color: c.cream, textTransform: "uppercase", letterSpacing: "0.1em",
-              textShadow: MILLS_SHADOW }}>
-              Reference
-            </h1>
+              textShadow: MILLS_SHADOW }}>Reference</h1>
           </div>
           <div style={{ height: 3, backgroundColor: c.rose }} />
-          <div style={{ backgroundColor: c.parch, padding: "0.5rem 1.5rem", borderBottom: `2px solid ${c.black}` }}>
+          <div style={{ backgroundColor: c.parch, padding: "0.5rem 1.5rem" }}>
             <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
               fontSize: "0.95rem", color: c.ink, opacity: 0.7 }}>
               King Arthur weight chart &amp; kitchen substitutions
             </p>
           </div>
-          <div style={{ height: 10, backgroundImage: p.cableTeal, backgroundRepeat: "repeat-x" }} />
-          <div style={{ height: 5, backgroundColor: c.rose }} />
-        </div>
+        </LabelFrame>
 
         {/* Tabs */}
         <div style={{ backgroundColor: c.parch, border: `2px solid ${c.black}`, borderBottom: "none", display: "flex" }}>

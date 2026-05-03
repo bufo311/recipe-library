@@ -1,5 +1,6 @@
 import React from "react";
 import { Layout } from "@/components/layout";
+import { LabelFrame } from "@/components/label-frame";
 import { useGetRecipe, useDeleteRecipe, useConvertToGrams, getGetRecipeQueryKey, getListRecipesQueryKey } from "@workspace/api-client-react";
 import { useLocation, useParams, Link } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
@@ -89,14 +90,13 @@ export default function RecipeDetail() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-10 max-w-4xl">
-        <div style={{ border: `3px solid ${c.black}` }}>
+        <LabelFrame>
 
-          {/* Top ornament */}
-          <div style={{ height: 12, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x" }} />
+          {/* Internal top accent bands */}
           <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />
           <div style={{ height: 3, backgroundColor: c.rose }} />
 
-          {/* Title zone — sage MILLS background */}
+          {/* Title zone */}
           <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", inset: 0, pointerEvents: "none",
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='2' cy='2' r='0.5' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")` }} />
@@ -154,7 +154,7 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          {/* Below title bands */}
+          {/* Post-title bands */}
           <div style={{ height: 3, backgroundColor: c.rose }} />
           <div style={{ height: 10, backgroundImage: p.cableTeal, backgroundRepeat: "repeat-x" }} />
           <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x" }} />
@@ -191,8 +191,6 @@ export default function RecipeDetail() {
 
           {/* Body columns */}
           <div className="grid grid-cols-1 md:grid-cols-12">
-
-            {/* Left maroon column */}
             <div className="md:col-span-4" style={{ backgroundColor: c.maroon, borderRight: `3px solid ${c.black}` }}>
               <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x",
                 borderBottom: `1px solid ${c.black}` }} />
@@ -201,9 +199,7 @@ export default function RecipeDetail() {
                 display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.85rem",
                   fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em",
-                  color: c.cream, textShadow: MILLS_SHADOW }}>
-                  The Manifest
-                </h2>
+                  color: c.cream, textShadow: MILLS_SHADOW }}>The Manifest</h2>
                 <Button variant="ghost" size="sm" onClick={handleToggleGrams}
                   disabled={convertToGrams.isPending}
                   style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.6rem",
@@ -227,7 +223,6 @@ export default function RecipeDetail() {
                 borderTop: `1px solid ${c.black}`, marginTop: 8 }} />
             </div>
 
-            {/* Right cream column */}
             <div className="md:col-span-8" style={{ backgroundColor: c.cream }}>
               <div style={{ height: 12, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x",
                 borderBottom: `1px solid ${c.black}` }} />
@@ -235,9 +230,7 @@ export default function RecipeDetail() {
                 borderBottom: `2px solid ${c.black}`, textAlign: "center" }}>
                 <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.85rem",
                   fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em",
-                  color: c.cream, textShadow: MILLS_SHADOW }}>
-                  Method of Preparation
-                </h2>
+                  color: c.cream, textShadow: MILLS_SHADOW }}>Method of Preparation</h2>
               </div>
               <ol className="space-y-7 p-6">
                 {recipe.instructions.map((instruction, idx) => (
@@ -248,9 +241,7 @@ export default function RecipeDetail() {
                       {(idx + 1).toString().padStart(2, "0")}
                     </span>
                     <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.15rem",
-                      lineHeight: 1.78, color: c.ink }}>
-                      {instruction}
-                    </p>
+                      lineHeight: 1.78, color: c.ink }}>{instruction}</p>
                   </li>
                 ))}
               </ol>
@@ -272,17 +263,17 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          {/* Bottom ornament */}
-          <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x" }} />
+          {/* Bottom accent bands */}
           <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />
-          <div style={{ display: "flex", height: 6 }}>
+          <div style={{ display: "flex", height: 5 }}>
             <div style={{ flex: 1, backgroundColor: c.rose  }} />
             <div style={{ flex: 2, backgroundColor: c.gold  }} />
             <div style={{ flex: 1, backgroundColor: c.teal  }} />
             <div style={{ flex: 2, backgroundColor: c.gold  }} />
             <div style={{ flex: 1, backgroundColor: c.rose  }} />
           </div>
-        </div>
+
+        </LabelFrame>
       </div>
     </Layout>
   );

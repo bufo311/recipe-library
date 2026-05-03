@@ -1,4 +1,5 @@
 import { Layout } from "@/components/layout";
+import { LabelFrame } from "@/components/label-frame";
 import { UrlImporter } from "@/components/url-importer";
 import { useListRecipes, useGetRecipeStats, useGetRecipeFacets } from "@/lib/api-client";
 import { Link } from "wouter";
@@ -59,9 +60,10 @@ export default function Dashboard() {
         {/* Top grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-12">
           <div className="lg:col-span-8"><UrlImporter /></div>
+
+          {/* Ledger — full LabelFrame */}
           <div className="lg:col-span-4">
-            <div style={{ border: `2px solid ${c.black}`, overflow: "hidden" }}>
-              <div style={{ height: 12, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x" }} />
+            <LabelFrame>
               <div style={{ backgroundColor: c.sage, padding: "0.55rem 1rem",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 borderBottom: `2px solid ${c.gold}` }}>
@@ -88,9 +90,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div style={{ height: 10, backgroundImage: p.cableTeal, backgroundRepeat: "repeat-x" }} />
-              <div style={{ height: 5, backgroundColor: c.rose }} />
-            </div>
+            </LabelFrame>
           </div>
         </div>
 
@@ -113,7 +113,8 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.58rem",
                 textTransform: "uppercase", letterSpacing: "0.2em", color: c.ink, opacity: 0.5 }}>
-                Filter by Category</p>
+                Filter by Category
+              </p>
               {activeFilterCount > 0 && (
                 <button onClick={clearFilters} className="flex items-center gap-1"
                   style={{ color: c.rose, fontSize: "0.7rem", fontFamily: "'Outfit', sans-serif" }}>
@@ -184,11 +185,11 @@ export default function Dashboard() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[1,2,3,4,5,6].map(i => (
-              <div key={i} style={{ border: `2px solid ${c.black}` }}>
-                <Skeleton className="h-12 w-full" style={{ borderRadius: 0 }} />
+              <LabelFrame key={i}>
+                <Skeleton className="h-10 w-full" style={{ borderRadius: 0 }} />
                 <Skeleton className="w-full aspect-[4/3]" style={{ borderRadius: 0 }} />
-                <Skeleton className="h-16 w-full" style={{ borderRadius: 0 }} />
-              </div>
+                <Skeleton className="h-14 w-full" style={{ borderRadius: 0 }} />
+              </LabelFrame>
             ))}
           </div>
         ) : recipes && recipes.length > 0 ? (
@@ -198,79 +199,101 @@ export default function Dashboard() {
               const accent = c[accentKey];
               return (
                 <Link key={recipe.id} href={`/recipe/${recipe.id}`}>
-                  <article className="group cursor-pointer animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
+                  <div className="group cursor-pointer animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
                     style={{ animationDelay: `${idx * 50}ms`, animationDuration: "500ms",
-                      border: `2px solid ${c.black}`, transition: "transform 0.2s, box-shadow 0.2s" }}
+                      transition: "transform 0.2s, box-shadow 0.2s" }}
                     onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)";
-                      e.currentTarget.style.boxShadow = `5px 5px 0 ${c.black}`; }}
+                      e.currentTarget.style.boxShadow = `6px 6px 0 ${c.black}`; }}
                     onMouseLeave={e => { e.currentTarget.style.transform = "none";
                       e.currentTarget.style.boxShadow = "none"; }}>
+                    <LabelFrame>
+                      {/* Inner top accent */}
+                      <div style={{ display: "flex", height: 4 }}>
+                        <div style={{ flex: 1, backgroundColor: c.rose }} />
+                        <div style={{ flex: 2, backgroundColor: c.gold }} />
+                        <div style={{ flex: 1, backgroundColor: c.rose }} />
+                      </div>
 
-                    <div style={{ height: 10, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x" }} />
-                    <div style={{ backgroundColor: c.sage, padding: "0.6rem 0.85rem",
-                      borderBottom: `2px solid ${c.black}`, borderTop: `1px solid ${c.black}` }}>
-                      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1rem",
-                        fontWeight: 900, color: c.cream, lineHeight: 1.25, textShadow: MILLS_SHADOW }}>
-                        {recipe.title}
-                      </h3>
-                    </div>
-                    <div style={{ backgroundColor: c.teal, padding: "0.22rem 0.85rem",
-                      borderBottom: `1px solid ${c.black}` }}>
-                      <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.58rem",
-                        textTransform: "uppercase", letterSpacing: "0.2em", color: c.cream, opacity: 0.9 }}>
-                        {[recipe.course, recipe.cuisine].filter(Boolean).join(" · ") || "Spencer's Emporium"}
-                      </p>
-                    </div>
-                    <div style={{ height: 4, backgroundColor: c.rose }} />
-                    <div style={{ aspectRatio: "4/3", overflow: "hidden", backgroundColor: c.powder,
-                      borderBottom: `2px solid ${c.black}`, backgroundImage: p.powderTile }}>
-                      {recipe.imagePath ? (
-                        <img src={recipe.imagePath} alt={recipe.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          style={{ filter: "sepia(0.15) contrast(1.05)" }} />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Book className="h-10 w-10" style={{ color: c.teal, opacity: 0.3 }} />
-                        </div>
-                      )}
-                    </div>
-                    <div style={{ backgroundColor: c.parch, padding: "0.6rem 0.85rem 0.5rem",
-                      borderBottom: `2px solid ${c.black}` }}>
-                      {recipe.attribute && recipe.attribute.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {recipe.attribute.map(attr => (
-                            <span key={attr} style={{ display: "inline-block", padding: "0.1rem 0.45rem",
-                              border: `1px solid ${c.ink}`, color: c.ink, fontSize: "0.58rem",
-                              fontFamily: "'Outfit', sans-serif", textTransform: "uppercase",
-                              letterSpacing: "0.1em", opacity: 0.6 }}>{attr}</span>
-                          ))}
-                        </div>
-                      ) : (
-                        <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
-                          fontSize: "0.82rem", color: c.ink, opacity: 0.4 }}>❧ Spencer's Emporium</p>
-                      )}
-                    </div>
-                    <div style={{ height: 8, backgroundColor: accent }} />
-                  </article>
+                      {/* Sage title */}
+                      <div style={{ backgroundColor: c.sage, padding: "0.6rem 0.85rem",
+                        borderBottom: `2px solid ${c.black}`, borderTop: `1px solid ${c.black}` }}>
+                        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1rem",
+                          fontWeight: 900, color: c.cream, lineHeight: 1.25, textShadow: MILLS_SHADOW }}>
+                          {recipe.title}
+                        </h3>
+                      </div>
+
+                      {/* Teal subtitle */}
+                      <div style={{ backgroundColor: c.teal, padding: "0.22rem 0.85rem",
+                        borderBottom: `1px solid ${c.black}` }}>
+                        <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.58rem",
+                          textTransform: "uppercase", letterSpacing: "0.2em", color: c.cream, opacity: 0.9 }}>
+                          {[recipe.course, recipe.cuisine].filter(Boolean).join(" · ") || "Spencer's Emporium"}
+                        </p>
+                      </div>
+
+                      {/* Image */}
+                      <div style={{ aspectRatio: "4/3", overflow: "hidden", backgroundColor: c.powder,
+                        borderBottom: `2px solid ${c.black}`, backgroundImage: p.powderTile }}>
+                        {recipe.imagePath ? (
+                          <img src={recipe.imagePath} alt={recipe.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            style={{ filter: "sepia(0.15) contrast(1.05)" }} />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Book className="h-10 w-10" style={{ color: c.teal, opacity: 0.3 }} />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Attribute footer */}
+                      <div style={{ backgroundColor: c.parch, padding: "0.55rem 0.85rem 0.45rem" }}>
+                        {recipe.attribute && recipe.attribute.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {recipe.attribute.map(attr => (
+                              <span key={attr} style={{ display: "inline-block", padding: "0.1rem 0.45rem",
+                                border: `1px solid ${c.ink}`, color: c.ink, fontSize: "0.58rem",
+                                fontFamily: "'Outfit', sans-serif", textTransform: "uppercase",
+                                letterSpacing: "0.1em", opacity: 0.6 }}>
+                                {attr}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
+                            fontSize: "0.82rem", color: c.ink, opacity: 0.4 }}>
+                            ❧ Spencer's Emporium
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Accent bottom */}
+                      <div style={{ height: 6, backgroundColor: accent }} />
+                    </LabelFrame>
+                  </div>
                 </Link>
               );
             })}
           </div>
         ) : (
-          <div className="text-center py-20"
-            style={{ border: `2px solid ${c.teal}`, backgroundColor: c.cream, opacity: 0.8 }}>
-            <Search className="h-8 w-8 mx-auto mb-4" style={{ color: c.ink, opacity: 0.2 }} />
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.2rem", color: c.ink }}>No receipts found</h3>
-            <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.82rem", color: c.ink, opacity: 0.5, marginTop: 6 }}>
-              {activeFilterCount > 0 ? "Try adjusting your filters." : "Add a new receipt to begin your collection."}
-            </p>
-            {activeFilterCount > 0 && (
-              <Button variant="outline" className="mt-4" onClick={clearFilters}
-                style={{ borderColor: c.teal, color: c.teal, borderRadius: 0, fontFamily: "'Outfit',sans-serif" }}>
-                <X className="h-4 w-4 mr-2" />Clear filters
-              </Button>
-            )}
-          </div>
+          <LabelFrame>
+            <div className="text-center py-20" style={{ backgroundColor: c.cream }}>
+              <Search className="h-8 w-8 mx-auto mb-4" style={{ color: c.ink, opacity: 0.2 }} />
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.2rem", color: c.ink }}>
+                No receipts found
+              </h3>
+              <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.82rem", color: c.ink,
+                opacity: 0.5, marginTop: 6 }}>
+                {activeFilterCount > 0 ? "Try adjusting your filters." : "Add a new receipt to begin your collection."}
+              </p>
+              {activeFilterCount > 0 && (
+                <Button variant="outline" className="mt-4" onClick={clearFilters}
+                  style={{ borderColor: c.teal, color: c.teal, borderRadius: 0, fontFamily: "'Outfit',sans-serif" }}>
+                  <X className="h-4 w-4 mr-2" />Clear filters
+                </Button>
+              )}
+            </div>
+          </LabelFrame>
         )}
       </div>
     </Layout>

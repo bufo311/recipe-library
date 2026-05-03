@@ -1,5 +1,6 @@
 import React from "react";
 import { Layout } from "@/components/layout";
+import { LabelFrame } from "@/components/label-frame";
 import {
   useGetRecipe, useDeleteRecipe, useConvertToGrams,
   getGetRecipeQueryKey, getListRecipesQueryKey,
@@ -93,13 +94,13 @@ export default function RecipeDetail() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-10 max-w-4xl">
-        <div style={{ border: `3px solid ${c.black}` }}>
+        <LabelFrame>
 
-          <div style={{ height: 12, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x" }} />
+          {/* Internal top accent bands */}
           <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />
           <div style={{ height: 3, backgroundColor: c.rose }} />
 
-          {/* Title */}
+          {/* Title zone */}
           <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "hidden" }}>
             <div className="flex justify-between items-start gap-4 relative">
               <div className="flex-1">
@@ -155,6 +156,7 @@ export default function RecipeDetail() {
             </div>
           </div>
 
+          {/* Post-title bands */}
           <div style={{ height: 3, backgroundColor: c.rose }} />
           <div style={{ height: 10, backgroundImage: p.cableTeal, backgroundRepeat: "repeat-x" }} />
           <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x" }} />
@@ -180,6 +182,7 @@ export default function RecipeDetail() {
             </div>
           </div>
 
+          {/* Hero image */}
           {recipe.imagePath && (
             <div style={{ backgroundColor: c.powder, overflow: "hidden", maxHeight: 320,
               borderBottom: `3px solid ${c.black}`, backgroundImage: p.powderTile }}>
@@ -188,8 +191,8 @@ export default function RecipeDetail() {
             </div>
           )}
 
+          {/* Body columns */}
           <div className="grid grid-cols-1 md:grid-cols-12">
-            {/* Left column */}
             <div className="md:col-span-4" style={{ backgroundColor: c.maroon, borderRight: `3px solid ${c.black}` }}>
               <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x",
                 borderBottom: `1px solid ${c.black}` }} />
@@ -222,7 +225,6 @@ export default function RecipeDetail() {
                 borderTop: `1px solid ${c.black}`, marginTop: 8 }} />
             </div>
 
-            {/* Right column */}
             <div className="md:col-span-8" style={{ backgroundColor: c.cream }}>
               <div style={{ height: 12, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x",
                 borderBottom: `1px solid ${c.black}` }} />
@@ -263,16 +265,17 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x" }} />
+          {/* Bottom accent bands */}
           <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />
-          <div style={{ display: "flex", height: 6 }}>
+          <div style={{ display: "flex", height: 5 }}>
             <div style={{ flex: 1, backgroundColor: c.rose  }} />
             <div style={{ flex: 2, backgroundColor: c.gold  }} />
             <div style={{ flex: 1, backgroundColor: c.teal  }} />
             <div style={{ flex: 2, backgroundColor: c.gold  }} />
             <div style={{ flex: 1, backgroundColor: c.rose  }} />
           </div>
-        </div>
+
+        </LabelFrame>
       </div>
     </Layout>
   );
