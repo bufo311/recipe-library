@@ -23,6 +23,16 @@ const PARCH  = "#E8D5A8";
 const BLACK  = "#140A04";
 const INK    = "#1E0E04";
 const POWDER = "#A8CBCF";
+const SAGE   = "#5E7A58";
+
+/* Decorative SVG band patterns — inline for title bands */
+const EGG_DART_DARK = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='12'%3E%3Crect width='20' height='12' fill='%23140A04'/%3E%3Cellipse cx='10' cy='6' rx='8' ry='3.5' fill='%23C8A020' opacity='0.3'/%3E%3Cellipse cx='10' cy='6' rx='5.5' ry='2' fill='%23140A04'/%3E%3Ccircle cx='0' cy='6' r='2' fill='%23C8A020' opacity='0.45'/%3E%3Ccircle cx='20' cy='6' r='2' fill='%23C8A020' opacity='0.45'/%3E%3C/svg%3E")`;
+const EGG_DART_MAROON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='12'%3E%3Crect width='20' height='12' fill='%234A1520'/%3E%3Cellipse cx='10' cy='6' rx='8' ry='3.5' fill='%23C8A020' opacity='0.28'/%3E%3Cellipse cx='10' cy='6' rx='5.5' ry='2' fill='%234A1520'/%3E%3Ccircle cx='0' cy='6' r='2' fill='%23C8A020' opacity='0.4'/%3E%3Ccircle cx='20' cy='6' r='2' fill='%23C8A020' opacity='0.4'/%3E%3C/svg%3E")`;
+const CABLE_TEAL = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Crect width='20' height='10' fill='%233D7A72'/%3E%3Cpath d='M0 5 Q5 1 10 5 Q15 9 20 5' fill='none' stroke='%23F5EEE0' stroke-width='0.9' opacity='0.35'/%3E%3Cpath d='M0 5 Q5 9 10 5 Q15 1 20 5' fill='none' stroke='%23F5EEE0' stroke-width='0.9' opacity='0.35'/%3E%3C/svg%3E")`;
+const CHEVRON_GOLD = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Crect width='16' height='8' fill='%23C8A020'/%3E%3Cpath d='M0 4 L4 1 L8 4 L12 1 L16 4 L12 7 L8 4 L4 7 Z' fill='none' stroke='%23140A04' stroke-width='0.7' opacity='0.35'/%3E%3C/svg%3E")`;
+
+/* MILLS-style 3D drop shadow — cream letters on sage/dark, stacked shadow */
+const MILLS_SHADOW = `1px 1px 0 #1A0808, 2px 2px 0 #1A0808, 3px 3px 0 rgba(0,0,0,0.35)`;
 
 function WaxSeal({ lines }: { lines: string[] }) {
   if (!lines.length) return null;
@@ -98,37 +108,43 @@ export default function RecipeDetail() {
     <Layout>
       <div className="container mx-auto px-4 py-10 max-w-4xl">
 
-        {/* ── Eastern Mills multi-band outer frame ── */}
+        {/* ── Outer frame ── */}
         <div style={{ border: `3px solid ${BLACK}` }}>
-          {/* Top rule: maroon | teal | gold | teal | maroon */}
-          <div style={{ display: "flex", height: 7 }}>
-            <div style={{ flex: 1, backgroundColor: MAROON }} />
-            <div style={{ flex: 2, backgroundColor: TEAL   }} />
-            <div style={{ flex: 1, backgroundColor: GOLD   }} />
-            <div style={{ flex: 2, backgroundColor: TEAL   }} />
-            <div style={{ flex: 1, backgroundColor: MAROON }} />
-          </div>
 
-          {/* ── Title band — "MILLS" dark zone ── */}
-          <div style={{ backgroundColor: BLACK, padding: "1.5rem 2rem",
-            borderBottom: `3px solid ${GOLD}` }}>
-            <div className="flex justify-between items-start gap-4">
+          {/* Top decorative band: egg-and-dart in dark */}
+          <div style={{ height: 12, backgroundImage: EGG_DART_DARK, backgroundRepeat: "repeat-x" }} />
+          <div style={{ height: 8, backgroundImage: CHEVRON_GOLD, backgroundRepeat: "repeat-x" }} />
+          <div style={{ height: 3, backgroundColor: ROSE }} />
+
+          {/* ── Title zone — SAGE green background, MILLS-style drop shadow ── */}
+          <div style={{ backgroundColor: SAGE, padding: "1.5rem 2rem",
+            position: "relative", overflow: "hidden" }}>
+            {/* Subtle inner texture */}
+            <div style={{ position: "absolute", inset: 0, pointerEvents: "none",
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='none'/%3E%3Ccircle cx='2' cy='2' r='0.5' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")` }} />
+
+            <div className="flex justify-between items-start gap-4 relative">
               <div className="flex-1">
-                {/* "FINE CULINARY RECEIPTS" — Outfit label above title */}
                 <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.55rem",
-                  textTransform: "uppercase", letterSpacing: "0.35em", color: TEAL,
-                  marginBottom: "0.4rem" }}>
+                  textTransform: "uppercase", letterSpacing: "0.35em", color: CREAM,
+                  opacity: 0.65, marginBottom: 6 }}>
                   Fine Culinary Receipts
                 </p>
-                <h1 style={{ fontFamily: "'Playfair Display', serif",
-                  fontSize: "clamp(2rem,5vw,3.5rem)", fontWeight: 900, color: GOLD,
-                  lineHeight: 1.1, textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>
+                {/* MILLS-style drop shadow title */}
+                <h1 style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: "clamp(2rem,5vw,3.5rem)", fontWeight: 900,
+                  color: CREAM,
+                  textShadow: MILLS_SHADOW,
+                  lineHeight: 1.1,
+                }}>
                   {recipe.title}
                 </h1>
                 {recipe.sourceUrl && (
                   <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 mt-2"
-                    style={{ fontSize: "0.72rem", color: ROSE, fontFamily: "'Outfit', sans-serif" }}>
+                    style={{ fontSize: "0.72rem", color: GOLD, fontFamily: "'Outfit', sans-serif",
+                      opacity: 0.85 }}>
                     Original Source <ExternalLink className="h-3 w-3" />
                   </a>
                 )}
@@ -137,8 +153,8 @@ export default function RecipeDetail() {
                 {sealLines.length > 0 && <WaxSeal lines={sealLines} />}
                 <div className="flex gap-2 mt-1">
                   <Button variant="ghost" size="sm" asChild
-                    style={{ color: GOLD, border: `1px solid ${GOLD}`, borderRadius: 0,
-                      fontFamily: "'Outfit', sans-serif", fontSize: "0.68rem" }}>
+                    style={{ color: CREAM, border: `1px solid ${CREAM}`, borderRadius: 0,
+                      fontFamily: "'Outfit', sans-serif", fontSize: "0.68rem", opacity: 0.8 }}>
                     <Link href={`/recipe/${recipe.id}/edit`}><Edit3 className="h-3.5 w-3.5 mr-1" />Edit</Link>
                   </Button>
                   <AlertDialog>
@@ -168,11 +184,16 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          {/* ── Teal band with course/time — "EASTERN" banner zone ── */}
+          {/* Below title: cable pattern + colour bands */}
+          <div style={{ height: 3, backgroundColor: ROSE }} />
+          <div style={{ height: 10, backgroundImage: CABLE_TEAL, backgroundRepeat: "repeat-x" }} />
+          <div style={{ height: 12, backgroundImage: EGG_DART_MAROON, backgroundRepeat: "repeat-x" }} />
+
+          {/* ── Teal info band ── */}
           <div style={{ backgroundColor: TEAL, padding: "0.5rem 2rem",
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            borderBottom: `2px solid ${BLACK}` }}>
-            <div className="flex gap-6">
+            display: "flex", alignItems: "center", gap: 0,
+            borderTop: `2px solid ${BLACK}`, borderBottom: `2px solid ${BLACK}` }}>
+            <div className="flex gap-6 flex-wrap">
               {[
                 { label: "Course",  val: recipe.course     },
                 { label: "Cuisine", val: recipe.cuisine    },
@@ -190,9 +211,6 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          {/* ── Rose accent strip ── */}
-          <div style={{ height: 6, backgroundColor: ROSE }} />
-
           {/* Hero image on powder-blue tile */}
           {recipe.imagePath && (
             <>
@@ -202,62 +220,65 @@ export default function RecipeDetail() {
                 <img src={recipe.imagePath} alt={recipe.title}
                   className="w-full object-cover" style={{ filter: "sepia(0.1) contrast(1.05)" }} />
               </div>
-              <div style={{ height: 5, backgroundColor: GOLD }} />
             </>
           )}
 
-          {/* ── Body: maroon left column + cream content — Eastern Mills layout ── */}
+          {/* ── Body: maroon left column + cream right ── */}
           <div className="grid grid-cols-1 md:grid-cols-12">
 
-            {/* Left column — maroon "sidebar" like Eastern Mills botanical panel */}
+            {/* Left — maroon botanical column */}
             <div className="md:col-span-4" style={{ backgroundColor: MAROON,
               borderRight: `3px solid ${BLACK}` }}>
-              {/* Column header */}
-              <div style={{ backgroundColor: BLACK, padding: "0.5rem 1rem",
-                borderBottom: `2px solid ${GOLD}`, textAlign: "center" }}>
-                <div className="flex items-center justify-between">
-                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.82rem",
-                    fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em", color: GOLD }}>
-                    The Manifest
-                  </h2>
-                  <Button variant="ghost" size="sm" onClick={handleToggleGrams}
-                    disabled={convertToGrams.isPending}
-                    style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.6rem",
-                      color: TEAL, backgroundColor: "transparent", padding: "0.1rem 0.3rem" }}>
-                    {convertToGrams.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Scale className="h-3 w-3 mr-1" />}
-                    {showGrams ? "Volume" : "Grams"}
-                  </Button>
-                </div>
+              {/* Column header — egg-and-dart above label */}
+              <div style={{ height: 12, backgroundImage: EGG_DART_MAROON, backgroundRepeat: "repeat-x",
+                borderBottom: `1px solid ${BLACK}` }} />
+              <div style={{ backgroundColor: BLACK, padding: "0.45rem 1rem",
+                borderBottom: `2px solid ${GOLD}`,
+                display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <h2 style={{
+                  fontFamily: "'Playfair Display', serif", fontSize: "0.85rem",
+                  fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em",
+                  color: CREAM, textShadow: `1px 1px 0 ${MAROON}, 2px 2px 0 rgba(0,0,0,0.3)`,
+                }}>
+                  The Manifest
+                </h2>
+                <Button variant="ghost" size="sm" onClick={handleToggleGrams}
+                  disabled={convertToGrams.isPending}
+                  style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.6rem",
+                    color: GOLD, backgroundColor: "transparent", padding: "0.1rem 0.3rem" }}>
+                  {convertToGrams.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Scale className="h-3 w-3 mr-1" />}
+                  {showGrams ? "Volume" : "Grams"}
+                </Button>
               </div>
-              {/* Thin gold rule */}
-              <div style={{ height: 3, backgroundColor: GOLD }} />
-              {/* Ingredients on maroon */}
               <ul className="space-y-3 p-5">
                 {recipe.ingredients.map((ingredient, idx) => (
                   <li key={idx} className="flex gap-2 leading-relaxed">
                     <span style={{ color: GOLD, opacity: 0.7, marginTop: 2, flexShrink: 0 }}>—</span>
                     <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem",
-                      color: CREAM, opacity: 0.9 }}>
+                      color: CREAM, opacity: 0.92 }}>
                       {getDisplayedIngredient(ingredient, idx)}
                     </span>
                   </li>
                 ))}
               </ul>
-              {/* Rose bottom strip on column */}
-              <div style={{ height: 5, backgroundColor: ROSE, marginTop: "auto" }} />
+              <div style={{ height: 12, backgroundImage: EGG_DART_MAROON, backgroundRepeat: "repeat-x",
+                borderTop: `1px solid ${BLACK}`, marginTop: 8 }} />
             </div>
 
-            {/* Right: cream content — instructions + notes */}
+            {/* Right — cream instructions */}
             <div className="md:col-span-8" style={{ backgroundColor: CREAM }}>
-              {/* Header */}
-              <div style={{ backgroundColor: BLACK, padding: "0.5rem 1.25rem",
-                borderBottom: `2px solid ${GOLD}`, textAlign: "center" }}>
-                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.82rem",
-                  fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em", color: TEAL }}>
+              <div style={{ height: 12, backgroundImage: EGG_DART_DARK, backgroundRepeat: "repeat-x",
+                borderBottom: `1px solid ${BLACK}` }} />
+              <div style={{ backgroundColor: SAGE, padding: "0.45rem 1.25rem",
+                borderBottom: `2px solid ${BLACK}`, textAlign: "center" }}>
+                <h2 style={{
+                  fontFamily: "'Playfair Display', serif", fontSize: "0.85rem",
+                  fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em",
+                  color: CREAM, textShadow: `1px 1px 0 #1A3A18, 2px 2px 0 rgba(0,0,0,0.3)`,
+                }}>
                   Method of Preparation
                 </h2>
               </div>
-              <div style={{ height: 3, backgroundColor: TEAL }} />
               <ol className="space-y-7 p-6">
                 {recipe.instructions.map((instruction, idx) => (
                   <li key={idx} className="flex gap-5">
@@ -274,7 +295,6 @@ export default function RecipeDetail() {
                 ))}
               </ol>
 
-              {/* Proprietor's Notes */}
               {recipe.notes && (
                 <div style={{ margin: "0 1.5rem 1.5rem", padding: "1.1rem",
                   backgroundColor: PARCH, border: `2px solid ${GOLD}`,
@@ -293,13 +313,15 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          {/* ── Bottom multi-band rule ── */}
-          <div style={{ display: "flex", height: 7 }}>
-            <div style={{ flex: 1, backgroundColor: ROSE   }} />
-            <div style={{ flex: 2, backgroundColor: GOLD   }} />
-            <div style={{ flex: 1, backgroundColor: TEAL   }} />
-            <div style={{ flex: 2, backgroundColor: GOLD   }} />
-            <div style={{ flex: 1, backgroundColor: ROSE   }} />
+          {/* ── Bottom decorative bands ── */}
+          <div style={{ height: 12, backgroundImage: EGG_DART_MAROON, backgroundRepeat: "repeat-x" }} />
+          <div style={{ height: 8, backgroundImage: CHEVRON_GOLD, backgroundRepeat: "repeat-x" }} />
+          <div style={{ display: "flex", height: 6 }}>
+            <div style={{ flex: 1, backgroundColor: ROSE  }} />
+            <div style={{ flex: 2, backgroundColor: GOLD  }} />
+            <div style={{ flex: 1, backgroundColor: TEAL  }} />
+            <div style={{ flex: 2, backgroundColor: GOLD  }} />
+            <div style={{ flex: 1, backgroundColor: ROSE  }} />
           </div>
         </div>
 
