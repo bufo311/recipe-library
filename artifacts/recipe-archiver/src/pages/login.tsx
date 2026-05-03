@@ -17,7 +17,7 @@ export default function LoginPage() {
     return () => window.removeEventListener("resize", fn);
   }, []);
   const card = isMobile
-    ? { top: "30%", left: "52%", width: "57%", scaleY: 1.04 }
+    ? { top: "28%", left: "52%", width: "57%", scaleY: 0.95 }
     : { top: "31%", left: "52%", width: "57%", scaleY: 1.19 };
 
   async function handleSubmit(e: React.FormEvent) {
