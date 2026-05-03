@@ -107,79 +107,97 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Filters */}
-        {hasFacets && (
-          <div className="mb-8 space-y-3">
-            <div className="flex items-center justify-between">
-              <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.58rem",
-                textTransform: "uppercase", letterSpacing: "0.2em", color: c.ink, opacity: 0.5 }}>
-                Filter by Category
-              </p>
-              {activeFilterCount > 0 && (
-                <button onClick={clearFilters} className="flex items-center gap-1"
-                  style={{ color: c.rose, fontSize: "0.7rem", fontFamily: "'Outfit', sans-serif" }}>
-                  <X className="h-3 w-3" /> Clear all
-                </button>
-              )}
+        {/* Collection frame: filters + search/new */}
+        <LabelFrame>
+          {/* Header */}
+          <div style={{
+            backgroundColor: c.sage,
+            padding: "0.55rem 1rem",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            borderBottom: `2px solid ${c.gold}`,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Search className="h-3.5 w-3.5" style={{ color: c.cream, opacity: 0.7 }} />
+              <h2 style={{
+                fontFamily: "'Playfair Display', serif", fontSize: "0.8rem",
+                fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em",
+                color: c.cream, textShadow: MILLS_SHADOW,
+              }}>The Collection</h2>
             </div>
-            <div className="flex flex-wrap gap-4">
-              {(facets?.courses?.length ?? 0) > 0 && (
-                <div className="space-y-1.5">
-                  <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.56rem",
-                    textTransform: "uppercase", letterSpacing: "0.15em", color: c.ink, opacity: 0.45 }}>Course</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {facets!.courses.map(v => <FilterPill key={v} active={filters.course === v} onClick={() => toggleFilter("course", v)}>{v}</FilterPill>)}
-                  </div>
-                </div>
-              )}
-              {(facets?.cuisines?.length ?? 0) > 0 && (
-                <div className="space-y-1.5">
-                  <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.56rem",
-                    textTransform: "uppercase", letterSpacing: "0.15em", color: c.ink, opacity: 0.45 }}>Cuisine</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {facets!.cuisines.map(v => <FilterPill key={v} active={filters.cuisine === v} onClick={() => toggleFilter("cuisine", v)}>{v}</FilterPill>)}
-                  </div>
-                </div>
-              )}
-              {(facets?.attributes?.length ?? 0) > 0 && (
-                <div className="space-y-1.5">
-                  <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.56rem",
-                    textTransform: "uppercase", letterSpacing: "0.15em", color: c.ink, opacity: 0.45 }}>Attributes</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {facets!.attributes.map(v => <FilterPill key={v} active={filters.attribute === v} onClick={() => toggleFilter("attribute", v)}>{v}</FilterPill>)}
-                  </div>
-                </div>
-              )}
-            </div>
+            {activeFilterCount > 0 && (
+              <button onClick={clearFilters} className="flex items-center gap-1"
+                style={{ color: c.gold, fontSize: "0.65rem", fontFamily: "'Outfit', sans-serif",
+                  opacity: 0.85, letterSpacing: "0.08em" }}>
+                <X className="h-3 w-3" /> Clear filters
+              </button>
+            )}
           </div>
-        )}
 
-        {/* Collection header + search */}
-        <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 mb-8">
-          <div>
-            <div style={{ height: 10, backgroundImage: p.cableTeal, backgroundRepeat: "repeat-x" }} />
-            <div style={{ backgroundColor: c.sage, padding: "0.35rem 1.25rem 0.4rem", display: "inline-block" }}>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.6rem",
-                fontWeight: 900, color: c.cream, textTransform: "uppercase", letterSpacing: "0.1em",
-                textShadow: MILLS_SHADOW }}>The Collection</h2>
+          {/* Body */}
+          <div style={{ backgroundColor: c.parch, padding: "0.85rem 1rem 1rem" }}>
+
+            {/* Filter pills */}
+            {hasFacets && (
+              <div className="mb-4">
+                <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
+                  textTransform: "uppercase", letterSpacing: "0.22em", color: c.ink,
+                  opacity: 0.4, marginBottom: "0.6rem" }}>
+                  Filter by Category
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  {(facets?.courses?.length ?? 0) > 0 && (
+                    <div className="space-y-1.5">
+                      <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
+                        textTransform: "uppercase", letterSpacing: "0.15em", color: c.ink, opacity: 0.4 }}>Course</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {facets!.courses.map(v => <FilterPill key={v} active={filters.course === v} onClick={() => toggleFilter("course", v)}>{v}</FilterPill>)}
+                      </div>
+                    </div>
+                  )}
+                  {(facets?.cuisines?.length ?? 0) > 0 && (
+                    <div className="space-y-1.5">
+                      <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
+                        textTransform: "uppercase", letterSpacing: "0.15em", color: c.ink, opacity: 0.4 }}>Cuisine</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {facets!.cuisines.map(v => <FilterPill key={v} active={filters.cuisine === v} onClick={() => toggleFilter("cuisine", v)}>{v}</FilterPill>)}
+                      </div>
+                    </div>
+                  )}
+                  {(facets?.attributes?.length ?? 0) > 0 && (
+                    <div className="space-y-1.5">
+                      <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
+                        textTransform: "uppercase", letterSpacing: "0.15em", color: c.ink, opacity: 0.4 }}>Attributes</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {facets!.attributes.map(v => <FilterPill key={v} active={filters.attribute === v} onClick={() => toggleFilter("attribute", v)}>{v}</FilterPill>)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* Divider between filters and search row */}
+                <div style={{ marginTop: "0.85rem", height: 1, backgroundColor: c.ink, opacity: 0.12 }} />
+              </div>
+            )}
+
+            {/* Search + New row */}
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                  style={{ color: c.ink, opacity: 0.35 }} />
+                <Input placeholder="Search the collection…" className="pl-9 h-10"
+                  style={{ border: `2px solid ${c.black}`, borderRadius: 0,
+                    backgroundColor: c.cream, fontFamily: "'Outfit', sans-serif", color: c.ink }}
+                  value={search} onChange={e => setSearch(e.target.value)} />
+              </div>
+              <Button asChild className="shrink-0 h-10"
+                style={{ backgroundColor: c.maroon, color: c.cream, borderRadius: 0,
+                  fontFamily: "'Playfair Display', serif", fontWeight: 700,
+                  fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase",
+                  border: `2px solid ${c.black}`, textShadow: "1px 1px 0 rgba(0,0,0,0.4)" }}>
+                <Link href="/recipe/new"><Plus className="h-4 w-4 mr-1.5" />New</Link>
+              </Button>
             </div>
-            <div style={{ height: 4, backgroundColor: c.rose, width: "100%" }} />
           </div>
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: c.ink, opacity: 0.4 }} />
-              <Input placeholder="Search the collection…" className="pl-9 h-10"
-                style={{ border: `2px solid ${c.black}`, borderRadius: 0, backgroundColor: c.cream,
-                  fontFamily: "'Outfit', sans-serif", color: c.ink }}
-                value={search} onChange={e => setSearch(e.target.value)} />
-            </div>
-            <Button asChild className="shrink-0 h-10"
-              style={{ backgroundColor: c.maroon, color: c.cream, borderRadius: 0,
-                fontFamily: "'Outfit', sans-serif", border: `2px solid ${c.black}` }}>
-              <Link href="/recipe/new"><Plus className="h-4 w-4 mr-2" />New</Link>
-            </Button>
-          </div>
-        </div>
+        </LabelFrame>
 
         {/* Recipe grid */}
         {isLoading ? (
