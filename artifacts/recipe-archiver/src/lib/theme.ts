@@ -97,35 +97,33 @@ export function makePatterns(c: ThemeColors) {
      * Threlkeld Granite catalogue.  Colors derive from the live theme.
      */
     borderVariants: [
-      // V0 — Diamond chain  (#144/#146 inspired)
-      // black bg · touching diamonds in gold outline · inner dot
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.black)}'/%3E%3Cpolygon points='9%2C0 18%2C9 9%2C18 0%2C9' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cpolygon points='9%2C3 15%2C9 9%2C15 3%2C9' fill='${enc(c.gold)}' opacity='0.22'/%3E%3Ccircle cx='9' cy='9' r='2' fill='${enc(c.gold)}' opacity='0.5'/%3E%3C/svg%3E")`,
+      // V0 — Diamond chain
+      (bg: string, p1: string, _p2: string) =>
+        `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(bg)}'/%3E%3Cpolygon points='9%2C0 18%2C9 9%2C18 0%2C9' fill='none' stroke='${enc(p1)}' stroke-width='1.5'/%3E%3Cpolygon points='9%2C3 15%2C9 9%2C15 3%2C9' fill='${enc(p1)}' opacity='0.22'/%3E%3Ccircle cx='9' cy='9' r='2' fill='${enc(p1)}' opacity='0.5'/%3E%3C/svg%3E")`,
 
-      // V1 — Greek Key Z-meander  (#130/#126 inspired)
-      // black bg · continuous Z-track in gold · thin outer bars
-      // Path enters left at y=9 and exits right at y=9 → tiles horizontally ✓
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.black)}'/%3E%3Crect width='18' height='1.5' fill='${enc(c.gold)}' opacity='0.45'/%3E%3Crect y='16.5' width='18' height='1.5' fill='${enc(c.gold)}' opacity='0.45'/%3E%3Cpath d='M 1.5%2C9 L 1.5%2C2.5 L 9%2C2.5 L 9%2C15.5 L 16.5%2C15.5 L 16.5%2C9' fill='none' stroke='${enc(c.gold)}' stroke-width='2.5' stroke-linejoin='miter'/%3E%3C/svg%3E")`,
+      // V1 — Greek Key Z-meander
+      (bg: string, p1: string, _p2: string) =>
+        `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(bg)}'/%3E%3Crect width='18' height='1.5' fill='${enc(p1)}' opacity='0.45'/%3E%3Crect y='16.5' width='18' height='1.5' fill='${enc(p1)}' opacity='0.45'/%3E%3Cpath d='M 1.5%2C9 L 1.5%2C2.5 L 9%2C2.5 L 9%2C15.5 L 16.5%2C15.5 L 16.5%2C9' fill='none' stroke='${enc(p1)}' stroke-width='2.5' stroke-linejoin='miter'/%3E%3C/svg%3E")`,
 
-      // V2 — Diagonal herringbone  (#118/#138 inspired)
-      // maroon bg · gold SW-NE diagonal band · cream highlight stripe inside
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.maroon)}'/%3E%3Cpolygon points='0%2C6 6%2C0 12%2C0 0%2C12' fill='${enc(c.gold)}'/%3E%3Cpolygon points='6%2C18 18%2C6 18%2C12 12%2C18' fill='${enc(c.gold)}'/%3E%3Cpolygon points='0%2C9 9%2C0 11%2C0 0%2C11' fill='${enc(c.cream)}' opacity='0.45'/%3E%3Cpolygon points='9%2C18 18%2C9 18%2C11 11%2C18' fill='${enc(c.cream)}' opacity='0.45'/%3E%3C/svg%3E")`,
+      // V2 — Diagonal herringbone
+      (bg: string, p1: string, p2: string) =>
+        `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(bg)}'/%3E%3Cpolygon points='0%2C6 6%2C0 12%2C0 0%2C12' fill='${enc(p1)}'/%3E%3Cpolygon points='6%2C18 18%2C6 18%2C12 12%2C18' fill='${enc(p1)}'/%3E%3Cpolygon points='0%2C9 9%2C0 11%2C0 0%2C11' fill='${enc(p2)}' opacity='0.45'/%3E%3Cpolygon points='9%2C18 18%2C9 18%2C11 11%2C18' fill='${enc(p2)}' opacity='0.45'/%3E%3C/svg%3E")`,
 
-      // V3 — Cross / quatrefoil  (#128 inspired)
-      // teal bg · cream cross arms · teal centre void · gold corner dots
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.teal)}'/%3E%3Crect x='7' y='2' width='4' height='14' fill='${enc(c.cream)}'/%3E%3Crect x='2' y='7' width='14' height='4' fill='${enc(c.cream)}'/%3E%3Ccircle cx='9' cy='9' r='3.5' fill='${enc(c.teal)}'/%3E%3Ccircle cx='0' cy='0' r='2.5' fill='${enc(c.gold)}'/%3E%3Ccircle cx='18' cy='0' r='2.5' fill='${enc(c.gold)}'/%3E%3Ccircle cx='0' cy='18' r='2.5' fill='${enc(c.gold)}'/%3E%3Ccircle cx='18' cy='18' r='2.5' fill='${enc(c.gold)}'/%3E%3C/svg%3E")`,
+      // V3 — Cross / quatrefoil
+      (bg: string, p1: string, p2: string) =>
+        `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(bg)}'/%3E%3Crect x='7' y='2' width='4' height='14' fill='${enc(p1)}'/%3E%3Crect x='2' y='7' width='14' height='4' fill='${enc(p1)}'/%3E%3Ccircle cx='9' cy='9' r='3.5' fill='${enc(bg)}'/%3E%3Ccircle cx='0' cy='0' r='2.5' fill='${enc(p2)}'/%3E%3Ccircle cx='18' cy='0' r='2.5' fill='${enc(p2)}'/%3E%3Ccircle cx='0' cy='18' r='2.5' fill='${enc(p2)}'/%3E%3Ccircle cx='18' cy='18' r='2.5' fill='${enc(p2)}'/%3E%3C/svg%3E")`,
 
-      // V4 — Oval / egg-and-dart  (#116 inspired)
-      // cream bg · ink border bars · rose outer ellipse · cream inner void · maroon dot · gold side nodes
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.cream)}'/%3E%3Crect width='18' height='2' fill='${enc(c.ink)}'/%3E%3Crect y='16' width='18' height='2' fill='${enc(c.ink)}'/%3E%3Cellipse cx='9' cy='9' rx='7' ry='5' fill='${enc(c.rose)}' opacity='0.4'/%3E%3Cellipse cx='9' cy='9' rx='5' ry='3.5' fill='${enc(c.cream)}'/%3E%3Ccircle cx='9' cy='9' r='1.8' fill='${enc(c.maroon)}' opacity='0.7'/%3E%3Ccircle cx='0' cy='9' r='2' fill='${enc(c.gold)}'/%3E%3Ccircle cx='18' cy='9' r='2' fill='${enc(c.gold)}'/%3E%3C/svg%3E")`,
+      // V4 — Oval / egg-and-dart
+      (bg: string, p1: string, p2: string) =>
+        `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(bg)}'/%3E%3Crect width='18' height='2' fill='${enc(p2)}'/%3E%3Crect y='16' width='18' height='2' fill='${enc(p2)}'/%3E%3Cellipse cx='9' cy='9' rx='7' ry='5' fill='${enc(p1)}' opacity='0.55'/%3E%3Cellipse cx='9' cy='9' rx='5' ry='3.5' fill='${enc(bg)}'/%3E%3Ccircle cx='9' cy='9' r='1.8' fill='${enc(p1)}' opacity='0.8'/%3E%3Ccircle cx='0' cy='9' r='2' fill='${enc(p1)}'/%3E%3Ccircle cx='18' cy='9' r='2' fill='${enc(p1)}'/%3E%3C/svg%3E")`,
 
-      // V5 — Circle-star band  (#162/#163 inspired)
-      // maroon bg · gold top+bottom bars · gold circle outline · inner crosshair · centre dot
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.maroon)}'/%3E%3Crect width='18' height='2.5' fill='${enc(c.gold)}'/%3E%3Crect y='15.5' width='18' height='2.5' fill='${enc(c.gold)}'/%3E%3Ccircle cx='9' cy='9' r='5' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cpath d='M9 4 L9 14 M4 9 L14 9' stroke='${enc(c.gold)}' stroke-width='1' opacity='0.5'/%3E%3Ccircle cx='9' cy='9' r='1.5' fill='${enc(c.gold)}' opacity='0.6'/%3E%3C/svg%3E")`,
+      // V5 — Circle-star band
+      (bg: string, p1: string, _p2: string) =>
+        `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(bg)}'/%3E%3Crect width='18' height='2.5' fill='${enc(p1)}'/%3E%3Crect y='15.5' width='18' height='2.5' fill='${enc(p1)}'/%3E%3Ccircle cx='9' cy='9' r='5' fill='none' stroke='${enc(p1)}' stroke-width='1.5'/%3E%3Cpath d='M9 4 L9 14 M4 9 L14 9' stroke='${enc(p1)}' stroke-width='1' opacity='0.5'/%3E%3Ccircle cx='9' cy='9' r='1.5' fill='${enc(p1)}' opacity='0.6'/%3E%3C/svg%3E")`,
 
-      // V6 — S-wave / cable twist  (#148 inspired)
-      // black bg · cream outer S-wave · gold inner S-wave
-      // Both paths enter + exit at y=9 on left/right edges → tiles horizontally ✓
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.black)}'/%3E%3Cpath d='M 0%2C9 Q 4.5%2C0 9%2C9 Q 13.5%2C18 18%2C9' fill='none' stroke='${enc(c.cream)}' stroke-width='3'/%3E%3Cpath d='M 0%2C9 Q 4.5%2C2 9%2C9 Q 13.5%2C16 18%2C9' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5' opacity='0.8'/%3E%3C/svg%3E")`,
-    ] as string[],
+      // V6 — S-wave / cable twist
+      (bg: string, p1: string, p2: string) =>
+        `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(bg)}'/%3E%3Cpath d='M 0%2C9 Q 4.5%2C0 9%2C9 Q 13.5%2C18 18%2C9' fill='none' stroke='${enc(p1)}' stroke-width='3'/%3E%3Cpath d='M 0%2C9 Q 4.5%2C2 9%2C9 Q 13.5%2C16 18%2C9' fill='none' stroke='${enc(p2)}' stroke-width='1.5' opacity='0.8'/%3E%3C/svg%3E")`,
+    ] as Array<(bg: string, p1: string, p2: string) => string>,
   };
 }

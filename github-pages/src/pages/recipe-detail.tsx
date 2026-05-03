@@ -17,8 +17,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { useTheme } from "@/lib/theme-context";
+import type { ThemeColors } from "@/lib/theme";
 
-function WaxSeal({ lines, c }: { lines: string[]; c: Record<string, string> }) {
+function WaxSeal({ lines, c }: { lines: string[]; c: ThemeColors }) {
   if (!lines.length) return null;
   return (
     <div style={{
