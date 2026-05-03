@@ -19,6 +19,29 @@ import { useState } from "react";
 import { useTheme } from "@/lib/theme-context";
 import type { ThemeColors } from "@/lib/theme";
 
+import bannerSvg from "@/assets/banner.svg";
+
+function TitleBanner({ title, c }: { title: string; c: ThemeColors }) {
+  // Curve approximating the cream ribbon's centerline in the banner SVG (viewBox 0 0 288 144).
+  // Tweak these numbers to nudge the text up/down/left/right inside the ribbon.
+  const curve = "M 78 78 Q 172 92 264 70";
+  const len = title.length;
+  const fontSize = len > 36 ? 10 : len > 28 ? 12 : len > 20 ? 14 : len > 12 ? 17 : 20;
+  return (
+    <div style={{ position: "relative", width: "100%", aspectRatio: "288 / 144" }}>
+      <img src={bannerSvg} alt="" style={{ width: "100%", height: "100%", display: "block" }} />
+      <svg viewBox="0 0 288 144" preserveAspectRatio="xMidYMid meet"
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+        <defs><path id="banner-curve" d={curve} fill="none" /></defs>
+        <text fontFamily="'Playfair Display', serif" fontWeight={700} fontSize={fontSize}
+          fill={c.ink} textAnchor="middle" letterSpacing="0.5">
+          <textPath href="#banner-curve" startOffset="50%">{title}</textPath>
+        </text>
+      </svg>
+    </div>
+  );
+}
+
 function WaxSeal({ lines, c }: { lines: string[]; c: ThemeColors }) {
   const shown = lines.slice(0, 2);
   if (!shown.length) return null;
@@ -106,15 +129,7 @@ export default function RecipeDetail() {
           <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "hidden" }}>
             <div className="flex justify-between items-start gap-4 relative">
               <div className="flex-1">
-                <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.55rem",
-                  textTransform: "uppercase", letterSpacing: "0.35em", color: c.cream, opacity: 0.65, marginBottom: 6 }}>
-                  Fine Culinary Receipts
-                </p>
-                <h1 style={{ fontFamily: "'Playfair Display', serif",
-                  fontSize: "clamp(2rem,5vw,3.5rem)", fontWeight: 900,
-                  color: c.cream, textShadow: MILLS_SHADOW, lineHeight: 1.1 }}>
-                  {recipe.title}
-                </h1>
+                <TitleBanner title={recipe.title} c={c} />
                 {recipe.sourceUrl && (
                   <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 mt-2"
