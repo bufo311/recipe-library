@@ -151,9 +151,12 @@ export default function Reference() {
                 opacity: 0.45, marginBottom: 20 }}>
                 Source: King Arthur Baking — values per cup, tablespoon &amp; teaspoon
               </p>
-              <div className="space-y-8">
-                {filteredChart.map(cat => (
-                  <div key={cat.label}>
+              <div className="space-y-6">
+                {filteredChart.map((cat, catIdx) => {
+                  const rowA = catIdx % 2 === 0 ? c.cream : c.parch;
+                  const rowB = catIdx % 2 === 0 ? c.parch : c.cream;
+                  return (
+                  <LabelFrame key={cat.label}>
                     <div style={{ height: 10, backgroundImage: p.cableTeal, backgroundRepeat: "repeat-x" }} />
                     <div style={{ backgroundColor: c.teal, padding: "0.3rem 0.85rem",
                       borderBottom: `2px solid ${c.black}` }}>
@@ -162,10 +165,10 @@ export default function Reference() {
                         {cat.label}
                       </h2>
                     </div>
-                    <div style={{ border: `2px solid ${c.black}`, borderTop: "none", overflow: "hidden" }}>
+                    <div style={{ overflow: "hidden" }}>
                       <table className="w-full text-sm">
                         <thead>
-                          <tr style={{ backgroundColor: c.parch, borderBottom: `2px solid ${c.black}` }}>
+                          <tr style={{ backgroundColor: rowB, borderBottom: `2px solid ${c.black}` }}>
                             <th className="text-left px-4 py-2.5"
                               style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.65rem",
                                 textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 700,
@@ -181,7 +184,7 @@ export default function Reference() {
                         <tbody>
                           {cat.entries.map((entry, i) => (
                             <tr key={entry.name} style={{
-                              backgroundColor: i % 2 === 0 ? c.cream : c.parch,
+                              backgroundColor: i % 2 === 0 ? rowA : rowB,
                               borderBottom: `1px solid rgba(30,14,4,0.08)` }}>
                               <td className="px-4 py-2.5"
                                 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem", color: c.ink }}>
@@ -198,8 +201,9 @@ export default function Reference() {
                         </tbody>
                       </table>
                     </div>
-                  </div>
-                ))}
+                  </LabelFrame>
+                  );
+                })}
                 {filteredChart.length === 0 && (
                   <p className="text-center py-8"
                     style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
