@@ -94,19 +94,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Ornamental rule */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ height: 12, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x" }} />
-          <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />
-          <div style={{ display: "flex", height: 4 }}>
-            <div style={{ flex: 1, backgroundColor: c.rose   }} />
-            <div style={{ flex: 2, backgroundColor: c.teal   }} />
-            <div style={{ flex: 1, backgroundColor: c.maroon }} />
-            <div style={{ flex: 2, backgroundColor: c.teal   }} />
-            <div style={{ flex: 1, backgroundColor: c.rose   }} />
-          </div>
-        </div>
-
         {/* Collection frame: filters + search/new */}
         <LabelFrame>
           {/* Header */}
@@ -200,6 +187,7 @@ export default function Dashboard() {
         </LabelFrame>
 
         {/* Recipe grid */}
+        <div className="mt-8">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[1,2,3,4,5,6].map(i => (
@@ -313,6 +301,7 @@ export default function Dashboard() {
             </div>
           </LabelFrame>
         )}
+        </div>
       </div>
     </Layout>
   );
