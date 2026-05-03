@@ -12,35 +12,27 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
   --color-card-border: hsl(var(--card-border));
-
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
   --color-popover-border: hsl(var(--popover-border));
-
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-primary-border: var(--primary-border);
-
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
   --color-secondary-border: var(--secondary-border);
-
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-muted-border: var(--muted-border);
-
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-accent-border: var(--accent-border);
-
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-destructive-border: var(--destructive-border);
-
   --color-sidebar: hsl(var(--sidebar));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
   --color-sidebar-border: hsl(var(--sidebar-border));
@@ -51,12 +43,10 @@
   --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
   --color-sidebar-accent-border: var(--sidebar-accent-border);
   --color-sidebar-ring: hsl(var(--sidebar-ring));
-
   --font-sans: 'Outfit', sans-serif;
   --font-serif: 'Playfair Display', serif;
   --font-display: 'Cormorant Garamond', serif;
   --font-mono: Menlo, monospace;
-
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -64,53 +54,43 @@
 }
 
 :root {
-  /* Cream paper — Maltby's label background */
-  --background: 38 40% 93%;
-  --foreground: 20 40% 10%;
-  --card: 40 50% 96%;
-  --card-foreground: 20 40% 10%;
-  --card-border: 35 30% 75%;
-  --popover: 40 50% 96%;
-  --popover-foreground: 20 40% 10%;
-  --popover-border: 35 30% 75%;
-
-  /* Claret/crimson — Maltby's scroll ends */
-  --primary: 352 65% 34%;
+  --background: 38 35% 90%;
+  --foreground: 20 40% 8%;
+  --card: 40 45% 95%;
+  --card-foreground: 20 40% 8%;
+  --card-border: 35 25% 70%;
+  --popover: 40 45% 95%;
+  --popover-foreground: 20 40% 8%;
+  --popover-border: 35 25% 70%;
+  /* Maroon — Eastern Mills left column */
+  --primary: 350 68% 28%;
   --primary-foreground: 40 50% 96%;
-
-  /* Forest green — Maltby's banner */
-  --secondary: 148 52% 25%;
+  /* Teal — Eastern Mills banner */
+  --secondary: 170 34% 35%;
   --secondary-foreground: 40 50% 96%;
-
-  --muted: 38 28% 85%;
-  --muted-foreground: 25 20% 40%;
-
-  --accent: 38 28% 85%;
-  --accent-foreground: 20 40% 10%;
-
+  --muted: 38 25% 83%;
+  --muted-foreground: 25 18% 40%;
+  --accent: 38 25% 83%;
+  --accent-foreground: 20 40% 8%;
   --destructive: 0 84% 48%;
   --destructive-foreground: 0 0% 100%;
-
-  --border: 35 25% 72%;
-  --input: 35 25% 72%;
-  --ring: 352 65% 34%;
-
-  --sidebar: 40 50% 96%;
-  --sidebar-foreground: 20 40% 10%;
-  --sidebar-border: 35 25% 72%;
-  --sidebar-primary: 352 65% 34%;
+  --border: 35 22% 68%;
+  --input: 35 22% 68%;
+  --ring: 350 68% 28%;
+  --sidebar: 40 45% 95%;
+  --sidebar-foreground: 20 40% 8%;
+  --sidebar-border: 35 22% 68%;
+  --sidebar-primary: 350 68% 28%;
   --sidebar-primary-foreground: 40 50% 96%;
-  --sidebar-accent: 38 28% 85%;
-  --sidebar-accent-foreground: 20 40% 10%;
-  --sidebar-ring: 352 65% 34%;
-
+  --sidebar-accent: 38 25% 83%;
+  --sidebar-accent-foreground: 20 40% 8%;
+  --sidebar-ring: 350 68% 28%;
   --radius: 0.125rem;
   --button-outline: rgba(0,0,0,.12);
   --badge-outline: rgba(0,0,0,.06);
   --opaque-button-border-intensity: -8;
   --elevate-1: rgba(0,0,0,.03);
   --elevate-2: rgba(0,0,0,.08);
-
   --primary-border: hsl(var(--primary));
   --secondary-border: hsl(var(--secondary));
   --muted-border: hsl(var(--muted));
@@ -129,9 +109,9 @@
   --popover: 20 14% 8%;
   --popover-foreground: 40 30% 92%;
   --popover-border: 20 10% 18%;
-  --primary: 352 65% 48%;
+  --primary: 350 68% 45%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 148 52% 35%;
+  --secondary: 170 34% 45%;
   --secondary-foreground: 0 0% 100%;
   --muted: 20 10% 18%;
   --muted-foreground: 40 10% 60%;
@@ -141,31 +121,27 @@
   --destructive-foreground: 0 0% 100%;
   --border: 20 10% 22%;
   --input: 20 10% 22%;
-  --ring: 352 65% 48%;
+  --ring: 350 68% 45%;
   --sidebar: 20 14% 8%;
   --sidebar-foreground: 40 30% 92%;
   --sidebar-border: 20 10% 18%;
-  --sidebar-primary: 352 65% 48%;
+  --sidebar-primary: 350 68% 45%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 20 10% 18%;
   --sidebar-accent-foreground: 40 30% 92%;
-  --sidebar-ring: 352 65% 48%;
+  --sidebar-ring: 350 68% 45%;
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
 
   body {
     @apply font-sans antialiased text-foreground;
-    /* Victorian tile wallpaper — diamond grid in muted gold, like Eastern Mills */
-    background-color: #EAE0CC;
+    /* Eastern Mills powder-blue tile wallpaper */
+    background-color: #C8DDE0;
     background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M20 0 L40 20 L20 40 L0 20 Z' fill='none' stroke='%23A08020' stroke-width='0.6' opacity='0.22'/%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23A08020' opacity='0.12'/%3E%3Ccircle cx='0' cy='0' r='1.5' fill='%23A08020' opacity='0.12'/%3E%3Ccircle cx='40' cy='0' r='1.5' fill='%23A08020' opacity='0.12'/%3E%3Ccircle cx='0' cy='40' r='1.5' fill='%23A08020' opacity='0.12'/%3E%3Ccircle cx='40' cy='40' r='1.5' fill='%23A08020' opacity='0.12'/%3E%3C/svg%3E");
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='24' height='24' fill='%23C8DDE0'/%3E%3Ccircle cx='12' cy='12' r='2' fill='none' stroke='%233D7A72' stroke-width='0.7' opacity='0.35'/%3E%3Cpath d='M12 4 L12 20 M4 12 L20 12' stroke='%233D7A72' stroke-width='0.5' opacity='0.18'/%3E%3Ccircle cx='0' cy='0' r='1' fill='%233D7A72' opacity='0.22'/%3E%3Ccircle cx='24' cy='0' r='1' fill='%233D7A72' opacity='0.22'/%3E%3Ccircle cx='0' cy='24' r='1' fill='%233D7A72' opacity='0.22'/%3E%3Ccircle cx='24' cy='24' r='1' fill='%233D7A72' opacity='0.22'/%3E%3C/svg%3E");
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
-  }
+  h1, h2, h3, h4, h5, h6 { @apply font-serif; }
 }
