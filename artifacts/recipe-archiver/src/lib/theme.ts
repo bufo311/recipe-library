@@ -40,7 +40,8 @@ export const THEME_LABELS: Record<keyof ThemeColors, { name: string; use: string
   bg:      { name: "Background",   use: "Page wallpaper (tile pattern base)" },
 };
 
-const STORAGE_KEY = "spencers-theme";
+const STORAGE_KEY        = "spencers-theme";
+const CUSTOM_DEFAULT_KEY = "spencers-custom-default";
 
 export function loadTheme(): ThemeColors {
   try {
@@ -54,6 +55,20 @@ export function loadTheme(): ThemeColors {
 
 export function saveTheme(t: ThemeColors): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(t));
+}
+
+export function loadCustomDefault(): ThemeColors | null {
+  try {
+    const raw = localStorage.getItem(CUSTOM_DEFAULT_KEY);
+    if (!raw) return null;
+    return { ...DEFAULT_THEME, ...JSON.parse(raw) };
+  } catch {
+    return null;
+  }
+}
+
+export function saveCustomDefault(t: ThemeColors): void {
+  localStorage.setItem(CUSTOM_DEFAULT_KEY, JSON.stringify(t));
 }
 
 /** Generate the SVG body-background tile pattern as a data URL */

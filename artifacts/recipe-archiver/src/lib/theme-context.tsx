@@ -1,22 +1,25 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
-  type ThemeColors, DEFAULT_THEME, loadTheme, saveTheme, makeBgPattern, makePatterns,
+  type ThemeColors, DEFAULT_THEME, loadTheme, saveTheme, loadCustomDefault, saveCustomDefault,
+  makeBgPattern, makePatterns,
 } from "./theme";
 
 interface ThemeCtx {
-  colors:      ThemeColors;
-  patterns:    ReturnType<typeof makePatterns>;
-  updateColor: (key: keyof ThemeColors, value: string) => void;
-  resetTheme:  () => void;
+  colors:            ThemeColors;
+  activeDefault:     ThemeColors;
+  patterns:          ReturnType<typeof makePatterns>;
+  updateColor:       (key: keyof ThemeColors, value: string) => void;
+  resetTheme:        () => void;
+  overwriteDefaults: () => void;
 }
 
 const Ctx = createContext<ThemeCtx>(null!);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [colors, setColors] = useState<ThemeColors>(loadTheme);
+  const [colors, setColors]               = useState<ThemeColors>(loadTheme);
+  const [activeDefault, setActiveDefault] = useState<ThemeColors>(() => loadCustomDefault() ?? DEFAULT_THEME);
   const styleRef = useRef<HTMLStyleElement | null>(null);
 
-  /* Write a <style> block that sets the body background whenever bg or teal changes */
   useEffect(() => {
     if (!styleRef.current) {
       const el = document.createElement("style");
@@ -36,12 +39,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetTheme = () => {
-    setColors({ ...DEFAULT_THEME });
-    saveTheme({ ...DEFAULT_THEME });
+    setColors({ ...activeDefault });
+    saveTheme({ ...activeDefault });
+  };
+
+  const overwriteDefaults = () => {
+    saveCustomDefault({ ...colors });
+    setActiveDefault({ ...colors });
   };
 
   return (
-    <Ctx.Provider value={{ colors, patterns: makePatterns(colors), updateColor, resetTheme }}>
+    <Ctx.Provider value={{ colors, activeDefault, patterns: makePatterns(colors), updateColor, resetTheme, overwriteDefaults }}>
       {children}
     </Ctx.Provider>
   );

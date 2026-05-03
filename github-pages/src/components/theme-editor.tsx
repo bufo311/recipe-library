@@ -1,13 +1,20 @@
 import { useState } from "react";
-import { Palette, X, RotateCcw } from "lucide-react";
+import { Palette, X, RotateCcw, Save } from "lucide-react";
 import { useTheme } from "@/lib/theme-context";
-import { THEME_LABELS, DEFAULT_THEME, type ThemeColors } from "@/lib/theme";
+import { THEME_LABELS, type ThemeColors } from "@/lib/theme";
 
 export function ThemeEditorButton() {
   const [open, setOpen] = useState(false);
-  const { colors, updateColor, resetTheme } = useTheme();
+  const [saved, setSaved] = useState(false);
+  const { colors, activeDefault, updateColor, resetTheme, overwriteDefaults } = useTheme();
 
   const keys = Object.keys(THEME_LABELS) as (keyof ThemeColors)[];
+
+  const handleOverwrite = () => {
+    overwriteDefaults();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
+  };
 
   return (
     <>
@@ -45,7 +52,7 @@ export function ThemeEditorButton() {
       {/* Slide-out panel */}
       <div style={{
         position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 50,
-        width: 320,
+        width: 300,
         transform: open ? "translateX(0)" : "translateX(100%)",
         transition: "transform 0.25s ease",
         display: "flex", flexDirection: "column",
@@ -74,39 +81,64 @@ export function ThemeEditorButton() {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            {/* Overwrite defaults */}
+            <button
+              onClick={handleOverwrite}
+              title="Save current colors as new default"
+              style={{
+                color: saved ? "#7ECE6A" : "#C8A020",
+                opacity: 0.85, cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 4,
+                fontFamily: "'Outfit', sans-serif", fontSize: "0.65rem",
+                background: "transparent", border: "none",
+                transition: "color 0.3s",
+              }}
+              className="hover:opacity-100"
+            >
+              <Save className="w-3 h-3" />
+              {saved ? "Saved!" : "Overwrite"}
+            </button>
+            {/* Reset to active default */}
             <button
               onClick={resetTheme}
-              title="Reset to defaults"
-              style={{ color: "#C8A020", opacity: 0.75, cursor: "pointer", display: "flex", alignItems: "center", gap: 4,
-                fontFamily: "'Outfit', sans-serif", fontSize: "0.65rem", background: "transparent", border: "none" }}
+              title="Reset to saved default"
+              style={{
+                color: "#C8A020", opacity: 0.75, cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 4,
+                fontFamily: "'Outfit', sans-serif", fontSize: "0.65rem",
+                background: "transparent", border: "none",
+              }}
               className="hover:opacity-100"
             >
               <RotateCcw className="w-3 h-3" /> Reset
             </button>
-            <button onClick={() => setOpen(false)} style={{ color: "#F5EEE0", opacity: 0.6, cursor: "pointer", background: "transparent", border: "none" }}>
+            <button
+              onClick={() => setOpen(false)}
+              style={{ color: "#F5EEE0", opacity: 0.6, cursor: "pointer", background: "transparent", border: "none" }}
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Color list */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "0.75rem 0" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "0.5rem 0" }}>
           {keys.map((key, i) => {
-            const { name, use } = THEME_LABELS[key];
+            const { use } = THEME_LABELS[key];
             const current = colors[key];
-            const isDefault = current === DEFAULT_THEME[key];
+            const isDefault = current === activeDefault[key];
             return (
               <div key={key}
                 style={{
-                  padding: "0.65rem 1.1rem",
+                  padding: "0.55rem 1.1rem",
                   borderBottom: i < keys.length - 1 ? "1px solid rgba(200,160,32,0.12)" : "none",
                   display: "flex", alignItems: "center", gap: 12,
                 }}>
 
-                {/* Color picker */}
+                {/* Color picker swatch */}
                 <label style={{ position: "relative", flexShrink: 0, cursor: "pointer" }}>
                   <div style={{
-                    width: 36, height: 36,
+                    width: 34, height: 34,
                     backgroundColor: current,
                     border: isDefault ? "2px solid rgba(200,160,32,0.35)" : "2px solid #C8A020",
                     boxShadow: isDefault ? "none" : "0 0 0 1px #C8A020",
@@ -120,25 +152,25 @@ export function ThemeEditorButton() {
                   />
                 </label>
 
-                {/* Label + hex */}
+                {/* Use description + hex */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
-                    <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.82rem",
-                      fontWeight: 700, color: "#F5EEE0" }}>{name}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                    <p style={{
+                      fontFamily: "'Outfit', sans-serif", fontSize: "0.68rem",
+                      color: "#F5EEE0", opacity: 0.75, lineHeight: 1.3, flex: 1,
+                    }}>{use}</p>
                     {!isDefault && (
                       <button
-                        onClick={() => updateColor(key, DEFAULT_THEME[key])}
-                        title="Reset this color"
-                        style={{ color: "#C8A020", opacity: 0.6, cursor: "pointer",
-                          background: "transparent", border: "none", lineHeight: 1 }}
+                        onClick={() => updateColor(key, activeDefault[key])}
+                        title="Reset this color to default"
+                        style={{ color: "#C8A020", opacity: 0.55, cursor: "pointer",
+                          background: "transparent", border: "none", lineHeight: 1, flexShrink: 0 }}
                         className="hover:opacity-100"
                       >
                         <RotateCcw className="w-2.5 h-2.5" />
                       </button>
                     )}
                   </div>
-                  <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.65rem",
-                    color: "#F5EEE0", opacity: 0.45, marginBottom: 3, lineHeight: 1.3 }}>{use}</p>
                   <input
                     type="text"
                     value={current}
@@ -150,7 +182,7 @@ export function ThemeEditorButton() {
                       if (!/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) updateColor(key, current);
                     }}
                     style={{
-                      fontFamily: "'Outfit', monospace", fontSize: "0.7rem",
+                      fontFamily: "'Outfit', monospace", fontSize: "0.68rem",
                       color: "#C8A020", background: "transparent",
                       border: "none", borderBottom: "1px solid rgba(200,160,32,0.3)",
                       width: 72, padding: "0 0 1px", outline: "none",
@@ -162,11 +194,11 @@ export function ThemeEditorButton() {
           })}
         </div>
 
-        {/* Footer note */}
-        <div style={{ padding: "0.75rem 1.1rem", borderTop: "1px solid rgba(200,160,32,0.18)" }}>
-          <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.6rem",
-            color: "#F5EEE0", opacity: 0.4, textAlign: "center", fontStyle: "italic" }}>
-            Changes save automatically and persist between visits
+        {/* Footer */}
+        <div style={{ padding: "0.65rem 1.1rem", borderTop: "1px solid rgba(200,160,32,0.18)" }}>
+          <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.58rem",
+            color: "#F5EEE0", opacity: 0.35, textAlign: "center", fontStyle: "italic" }}>
+            Changes save automatically · Overwrite to set new default
           </p>
         </div>
       </div>
