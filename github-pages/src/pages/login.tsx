@@ -29,7 +29,7 @@ export default function LoginPage() {
           borderBottom: `3px solid ${c.black}` }}>
           <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
             textTransform: "uppercase", letterSpacing: "0.35em", color: c.cream, opacity: 0.65, marginBottom: 6 }}>
-            Established 1884
+            Established 2026
           </p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.2rem",
             fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase",

@@ -48,14 +48,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/" style={{ textDecoration: "none" }}>
               <div style={{ textAlign: "center", padding: "0.25rem 0" }}>
 
-                {/* "Est. 1884" — tiny spaced caps above */}
+                {/* "Est. 2026" — tiny spaced caps above */}
                 <span style={{
                   display: "block",
                   fontFamily: "'Outfit', sans-serif",
                   fontSize: "0.38rem", letterSpacing: "0.5em",
                   textTransform: "uppercase", color: c.gold, opacity: 0.6,
                   marginBottom: 2,
-                }}>Est. ✦ 1884</span>
+                }}>Est. ✦ 2026</span>
 
                 {/* Main display word — Birshen-style layered shadow */}
                 <span style={{
@@ -194,7 +194,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div style={{ color: c.gold, marginBottom: 4, fontSize: "0.8rem", letterSpacing: "0.2em" }}>✦ ─── ❧ ─── ✦</div>
           <p style={{ color: c.cream, opacity: 0.65 }}>your quiet kitchen companion</p>
           <p style={{ fontSize: "0.65rem", opacity: 0.35, marginTop: 4, fontFamily: "'Outfit', sans-serif",
-            letterSpacing: "0.2em", textTransform: "uppercase", color: c.gold }}>Est. 1884</p>
+            letterSpacing: "0.2em", textTransform: "uppercase", color: c.gold }}>Est. 2026</p>
         </div>
 
         <div style={{ height: 3, backgroundColor: c.teal }} />
