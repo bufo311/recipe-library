@@ -58,7 +58,7 @@ export function RecipeForm({ defaultValues, onSubmit, isSubmitting }: RecipeForm
       notes: defaultValues?.notes || "",
       course: defaultValues?.course || "",
       cuisine: defaultValues?.cuisine || "",
-      cook: defaultValues?.cook || (typeof window !== "undefined" ? localStorage.getItem("spencer-cook") || "" : ""),
+      cook: defaultValues?.cook || "",
       attribute: defaultValues?.attribute || [],
       ingredients: defaultValues?.ingredients?.length ? defaultValues.ingredients : [{ value: "" }],
       instructions: defaultValues?.instructions?.length ? defaultValues.instructions : [{ value: "" }],
