@@ -19,19 +19,20 @@ import type { ThemeColors } from "@/lib/theme";
 import bannerSvg from "@/assets/banner.svg";
 
 function TitleBanner({ title, c }: { title: string; c: ThemeColors }) {
-  // Curve approximating the cream ribbon's centerline in the banner SVG (viewBox 0 0 288 144).
-  // Tweak these numbers to nudge the text up/down/left/right inside the ribbon.
-  const curve = "M 78 78 Q 172 92 264 70";
+  // Curve approximating the cream ribbon's centerline in banner SVG (viewBox 0 0 288 144).
+  // Symmetric shallow smile so text dips slightly in the middle to follow the sash.
+  const curve = "M 78 76 Q 172 96 266 76";
   const len = title.length;
-  const fontSize = len > 36 ? 10 : len > 28 ? 12 : len > 20 ? 14 : len > 12 ? 17 : 20;
+  const fontSize = len > 36 ? 11 : len > 28 ? 13 : len > 20 ? 15 : len > 12 ? 18 : 22;
   return (
     <div style={{ position: "relative", width: "100%", aspectRatio: "288 / 144" }}>
-      <img src={bannerSvg} alt="" style={{ width: "100%", height: "100%", display: "block" }} />
+      <img src={bannerSvg} alt="" style={{ width: "100%", height: "100%", display: "block",
+        filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.35))" }} />
       <svg viewBox="0 0 288 144" preserveAspectRatio="xMidYMid meet"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
         <defs><path id="banner-curve" d={curve} fill="none" /></defs>
         <text fontFamily="'Playfair Display', serif" fontWeight={700} fontSize={fontSize}
-          fill={c.ink} textAnchor="middle" letterSpacing="0.5">
+          fill={c.ink} textAnchor="middle" letterSpacing="0.3">
           <textPath href="#banner-curve" startOffset="50%">{title}</textPath>
         </text>
       </svg>
@@ -122,16 +123,21 @@ export default function RecipeDetail() {
           <div style={{ height: 3, backgroundColor: c.rose }} />
 
           {/* Title zone */}
-          <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "hidden" }}>
+          <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "visible", minHeight: 170 }}>
             <div style={{ position: "absolute", inset: 0, pointerEvents: "none",
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='2' cy='2' r='0.5' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")` }} />
+            {/* Banner hangs off the left edge, right end stops near card midpoint */}
+            <div style={{ position: "absolute", left: "-12%", top: "-18%", width: "70%",
+              pointerEvents: "none", zIndex: 3 }}>
+              <TitleBanner title={recipe.title} c={c} />
+            </div>
             <div className="flex justify-between items-start gap-4 relative">
-              <div className="flex-1">
-                <TitleBanner title={recipe.title} c={c} />
+              <div className="flex-1" style={{ minHeight: 90 }}>
                 {recipe.sourceUrl && (
                   <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 mt-2"
-                    style={{ fontSize: "0.72rem", color: c.gold, fontFamily: "'Outfit', sans-serif", opacity: 0.85 }}>
+                    className="inline-flex items-center gap-1"
+                    style={{ position: "absolute", bottom: 0, left: 0,
+                      fontSize: "0.72rem", color: c.gold, fontFamily: "'Outfit', sans-serif", opacity: 0.85 }}>
                     Original Source <ExternalLink className="h-3 w-3" />
                   </a>
                 )}
