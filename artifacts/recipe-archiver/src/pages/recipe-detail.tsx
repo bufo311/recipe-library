@@ -144,7 +144,7 @@ export default function RecipeDetail() {
             <div style={{ position: "absolute", inset: 0, pointerEvents: "none",
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='2' cy='2' r='0.5' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")` }} />
             {/* Banner: in-flow on mobile (full width, no overhang), absolute BANNER 1 placement on sm+ */}
-            <div className="relative w-full pointer-events-none z-30 mb-3 sm:mb-0 sm:absolute sm:left-[-33%] sm:top-[-14.3%] sm:w-[87.5%]">
+            <div className="relative w-auto -mx-4 pointer-events-none z-30 mb-3 sm:mx-0 sm:mb-0 sm:absolute sm:left-[-33%] sm:top-[-14.3%] sm:w-[87.5%]">
               <TitleBanner title={recipe.title} c={c} />
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start items-center gap-4 relative">
