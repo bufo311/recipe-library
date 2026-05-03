@@ -13,17 +13,17 @@ export interface ThemeColors {
 }
 
 export const DEFAULT_THEME: ThemeColors = {
-  maroon:  "#4A1520",
-  teal:    "#3D7A72",
-  gold:    "#C8A020",
-  rose:    "#C05870",
-  cream:   "#F5EEE0",
-  parch:   "#E8D5A8",
-  black:   "#140A04",
+  maroon:  "#E15A4F",
+  teal:    "#506c77",
+  gold:    "#D6A653",
+  rose:    "#D9899C",
+  cream:   "#F4E8C1",
+  parch:   "#E8D5AB",
+  black:   "#244560",
   ink:     "#1E0E04",
-  powder:  "#A8CBCF",
-  sage:    "#5E7A58",
-  bg:      "#C8DDE0",
+  powder:  "#F4E8C1",
+  sage:    "#3B5A3C",
+  bg:      "#C8DEE0",
 };
 
 export const THEME_LABELS: Record<keyof ThemeColors, { name: string; use: string }> = {
