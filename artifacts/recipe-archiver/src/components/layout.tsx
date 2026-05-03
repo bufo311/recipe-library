@@ -46,30 +46,58 @@ export function Layout({ children }: { children: React.ReactNode }) {
             borderRight: `2px solid ${c.gold}`,
           }}>
             <Link href="/" style={{ textDecoration: "none" }}>
-              <div style={{ textAlign: "center" }}>
+              <div style={{ textAlign: "center", padding: "0.25rem 0" }}>
+
+                {/* "Est. 1884" — tiny spaced caps above */}
                 <span style={{
                   display: "block",
                   fontFamily: "'Outfit', sans-serif",
-                  fontSize: "0.42rem", letterSpacing: "0.45em",
-                  textTransform: "uppercase", color: c.gold, opacity: 0.75,
-                }}>Est. 1884</span>
+                  fontSize: "0.38rem", letterSpacing: "0.5em",
+                  textTransform: "uppercase", color: c.gold, opacity: 0.6,
+                  marginBottom: 2,
+                }}>Est. ✦ 1884</span>
+
+                {/* Main display word — Birshen-style layered shadow */}
                 <span style={{
                   display: "block",
                   fontFamily: "'Playfair Display', serif",
-                  fontSize: "1.55rem", fontWeight: 900,
-                  letterSpacing: "0.12em", textTransform: "uppercase",
-                  color: c.cream, lineHeight: 1,
-                  textShadow: `1px 1px 0 rgba(0,0,0,0.4), 2px 2px 0 rgba(0,0,0,0.25)`,
+                  fontSize: "2.4rem", fontWeight: 900,
+                  letterSpacing: "0.08em", textTransform: "uppercase",
+                  color: c.gold,
+                  lineHeight: 0.95,
+                  textShadow: [
+                    /* black outline — all 8 directions */
+                    `-1px -1px 0 ${c.black}`,
+                    ` 1px -1px 0 ${c.black}`,
+                    `-1px  1px 0 ${c.black}`,
+                    ` 1px  1px 0 ${c.black}`,
+                    `-2px  0   0 ${c.black}`,
+                    ` 2px  0   0 ${c.black}`,
+                    ` 0   -2px 0 ${c.black}`,
+                    ` 0    2px 0 ${c.black}`,
+                    /* maroon drop shadow */
+                    ` 3px  4px 0 ${c.maroon}`,
+                    ` 4px  5px 0 ${c.maroon}80`,
+                  ].join(", "),
                 }}>Spencer's</span>
-                <span style={{
-                  display: "block",
-                  fontFamily: "'Outfit', sans-serif",
-                  fontSize: "0.42rem", letterSpacing: "0.32em",
-                  textTransform: "uppercase", color: c.cream, opacity: 0.5, marginTop: 4,
-                }}>Recipe Emporium</span>
-                <div style={{ marginTop: 5, color: c.gold, fontSize: "0.5rem", opacity: 0.45, letterSpacing: "0.15em" }}>
-                  ── ✦ ──
+
+                {/* "Recipe Emporium" banner */}
+                <div style={{
+                  marginTop: 5,
+                  backgroundColor: c.black,
+                  border: `1px solid ${c.gold}40`,
+                  padding: "0.18rem 0.5rem",
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                }}>
+                  <span style={{ color: c.gold, fontSize: "0.35rem", opacity: 0.5 }}>◆</span>
+                  <span style={{
+                    fontFamily: "'Outfit', sans-serif",
+                    fontSize: "0.4rem", letterSpacing: "0.35em",
+                    textTransform: "uppercase", color: c.cream, opacity: 0.7,
+                  }}>Recipe Emporium</span>
+                  <span style={{ color: c.gold, fontSize: "0.35rem", opacity: 0.5 }}>◆</span>
                 </div>
+
               </div>
             </Link>
           </div>
