@@ -2,9 +2,10 @@ import { useState } from "react";
 import mansHeadUrl from "./mans-head.svg";
 
 export function LoginTuner() {
-  const [top, setTop]     = useState(40);
-  const [width, setWidth] = useState(57);
-  const [left, setLeft]   = useState(50);
+  const [top, setTop]       = useState(40);
+  const [width, setWidth]   = useState(57);
+  const [left, setLeft]     = useState(50);
+  const [scale, setScale]   = useState(100);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center",
@@ -17,15 +18,17 @@ export function LoginTuner() {
           Login card position tuner
         </div>
 
-        <Slider label="Top" value={top} min={20} max={75} onChange={setTop} unit="%" />
-        <Slider label="Width" value={width} min={30} max={90} onChange={setWidth} unit="%" />
-        <Slider label="Left" value={left} min={20} max={80} onChange={setLeft} unit="%" />
+        <Slider label="Top"    value={top}   min={20}  max={75}  onChange={setTop}   unit="%" />
+        <Slider label="Width"  value={width} min={30}  max={90}  onChange={setWidth} unit="%" />
+        <Slider label="Left"   value={left}  min={20}  max={80}  onChange={setLeft}  unit="%" />
+        <Slider label="Height" value={scale} min={50}  max={160} onChange={setScale} unit="%" />
 
         <div style={{ marginTop: 8, padding: "8px 12px", background: "#f4f0e8", borderRadius: 6,
           fontSize: 12, fontFamily: "monospace", color: "#555", lineHeight: 1.8 }}>
           top: "{top}%"<br/>
           width: "{width}%"<br/>
-          left: "{left}%"
+          left: "{left}%"<br/>
+          transform: "scaleY({(scale/100).toFixed(2)})"
         </div>
       </div>
 
@@ -36,7 +39,8 @@ export function LoginTuner() {
           position: "absolute",
           top: `${top}%`,
           left: `${left}%`,
-          transform: "translateX(-50%)",
+          transform: `translateX(-50%) scaleY(${scale / 100})`,
+          transformOrigin: "top center",
           width: `${width}%`,
           zIndex: 1,
           background: "#4a6741",
