@@ -23,7 +23,6 @@ export default function Dashboard() {
   const debouncedSearch        = useDebounce(search, 300);
   const [filters, setFilters] = useState<Filters>({ course: null, cuisine: null, attribute: null, cook: null });
   const activeFilterCount      = Object.values(filters).filter(Boolean).length;
-  const myCook = typeof window !== "undefined" ? localStorage.getItem("spencer-cook") : null;
 
   const { data: recipes, isLoading } = useListRecipes(
     { search: debouncedSearch || undefined, course: filters.course ?? undefined,
@@ -126,6 +125,23 @@ export default function Dashboard() {
           {/* Body */}
           <div style={{ backgroundColor: c.parch, padding: "0.85rem 1rem 1rem" }}>
 
+            {/* Added by row */}
+            {(facets?.cooks?.length ?? 0) > 0 && (
+              <div className="mb-4">
+                <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
+                  textTransform: "uppercase", letterSpacing: "0.22em", color: c.ink,
+                  opacity: 0.4, marginBottom: "0.6rem" }}>
+                  Added by
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {facets!.cooks.map(v => (
+                    <FilterPill key={v} active={filters.cook === v} onClick={() => toggleFilter("cook", v)}>{v}</FilterPill>
+                  ))}
+                </div>
+                <div style={{ marginTop: "0.85rem", height: 1, backgroundColor: c.ink, opacity: 0.12 }} />
+              </div>
+            )}
+
             {/* Filter pills */}
             {hasFacets && (
               <div className="mb-4">
@@ -159,18 +175,6 @@ export default function Dashboard() {
                         textTransform: "uppercase", letterSpacing: "0.15em", color: c.ink, opacity: 0.4 }}>Attributes</p>
                       <div className="flex flex-wrap gap-1.5">
                         {facets!.attributes.map(v => <FilterPill key={v} active={filters.attribute === v} onClick={() => toggleFilter("attribute", v)}>{v}</FilterPill>)}
-                      </div>
-                    </div>
-                  )}
-                  {(facets?.cooks?.length ?? 0) > 0 && (
-                    <div className="space-y-1.5">
-                      <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
-                        textTransform: "uppercase", letterSpacing: "0.15em", color: c.ink, opacity: 0.4 }}>Cook</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {myCook && facets!.cooks.includes(myCook) && (
-                          <FilterPill active={filters.cook === myCook} onClick={() => toggleFilter("cook", myCook)}>★ Just mine</FilterPill>
-                        )}
-                        {facets!.cooks.map(v => <FilterPill key={v} active={filters.cook === v} onClick={() => toggleFilter("cook", v)}>{v}</FilterPill>)}
                       </div>
                     </div>
                   )}
