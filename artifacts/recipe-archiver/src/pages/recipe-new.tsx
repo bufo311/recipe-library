@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Layout } from "@/components/layout";
+import { LabelFrame } from "@/components/label-frame";
 import { RecipeForm, type RecipeFormValues } from "@/components/recipe-form";
 import { useCreateRecipe, getListRecipesQueryKey } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
@@ -82,13 +83,13 @@ export default function RecipeNew() {
             </p>
           )}
         </div>
-        <div className="bg-card rounded-xl p-8 shadow-sm border border-border">
+        <LabelFrame variant={2}>
           <RecipeForm
             defaultValues={defaultValues}
             onSubmit={handleSubmit}
             isSubmitting={createRecipe.isPending}
           />
-        </div>
+        </LabelFrame>
       </div>
     </Layout>
   );

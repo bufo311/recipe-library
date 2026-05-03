@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Layout } from "@/components/layout";
+import { LabelFrame } from "@/components/label-frame";
 import { RecipeForm, type RecipeFormValues } from "@/components/recipe-form";
 import { useCreateRecipe, getListRecipesQueryKey } from "@/lib/api-client";
 import { useLocation } from "wouter";
@@ -73,9 +74,9 @@ export default function RecipeNew() {
           <h1 className="text-4xl font-serif text-primary">{isImport ? "Review Imported Recipe" : "New Recipe"}</h1>
           {isImport && <p className="text-muted-foreground mt-2">We've filled in what we found. Check the guessed tags, make any corrections, then save.</p>}
         </div>
-        <div className="bg-card rounded-xl p-8 shadow-sm border border-border">
+        <LabelFrame variant={2}>
           <RecipeForm defaultValues={defaultValues} onSubmit={handleSubmit} isSubmitting={createRecipe.isPending} />
-        </div>
+        </LabelFrame>
       </div>
     </Layout>
   );
