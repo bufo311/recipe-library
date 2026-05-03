@@ -193,7 +193,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         <div style={{ backgroundColor: c.black, padding: "1.25rem 0" }}>
           <div style={{ color: c.gold, marginBottom: 4, fontSize: "0.8rem", letterSpacing: "0.2em" }}>✦ ─── ❧ ─── ✦</div>
-          <p style={{ color: c.cream, opacity: 0.65 }}>Entered at Stationers' Hall. All receipts faithfully preserved.</p>
+          <p style={{ color: c.cream, opacity: 0.65 }}>your quiet kitchen companion</p>
           <p style={{ fontSize: "0.65rem", opacity: 0.35, marginTop: 4, fontFamily: "'Outfit', sans-serif",
             letterSpacing: "0.2em", textTransform: "uppercase", color: c.gold }}>Est. 1884</p>
         </div>
