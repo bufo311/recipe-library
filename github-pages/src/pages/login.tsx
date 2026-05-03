@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center px-4">
-      <LabelFrame className="w-full max-w-xs">
+      <LabelFrame className="w-full max-w-xs" variant={0}>
 
         {/* Title band */}
         <div style={{ backgroundColor: c.sage, padding: "1.4rem 2rem", textAlign: "center",

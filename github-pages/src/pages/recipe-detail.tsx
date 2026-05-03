@@ -94,7 +94,7 @@ export default function RecipeDetail() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-10 max-w-4xl">
-        <LabelFrame>
+        <LabelFrame variant={6}>
 
           {/* Internal top accent bands */}
           <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />

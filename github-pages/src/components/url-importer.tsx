@@ -53,7 +53,7 @@ export function UrlImporter() {
   };
 
   return (
-    <LabelFrame>
+    <LabelFrame variant={2}>
       {/* Header — matches The Ledger */}
       <div style={{
         backgroundColor: c.sage,

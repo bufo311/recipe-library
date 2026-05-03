@@ -63,7 +63,7 @@ export default function Dashboard() {
 
           {/* Ledger — full LabelFrame */}
           <div className="lg:col-span-4">
-            <LabelFrame>
+            <LabelFrame variant={5}>
               <div style={{ backgroundColor: c.sage, padding: "0.55rem 1rem",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 borderBottom: `2px solid ${c.gold}` }}>
@@ -95,7 +95,7 @@ export default function Dashboard() {
         </div>
 
         {/* Collection frame: filters + search/new */}
-        <LabelFrame>
+        <LabelFrame variant={1}>
           {/* Header */}
           <div style={{
             backgroundColor: c.sage,
@@ -191,7 +191,7 @@ export default function Dashboard() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[1,2,3,4,5,6].map(i => (
-              <LabelFrame key={i}>
+              <LabelFrame key={i} variant={i % 7}>
                 <Skeleton className="h-10 w-full" style={{ borderRadius: 0 }} />
                 <Skeleton className="w-full aspect-[4/3]" style={{ borderRadius: 0 }} />
                 <Skeleton className="h-14 w-full" style={{ borderRadius: 0 }} />
@@ -212,7 +212,7 @@ export default function Dashboard() {
                       e.currentTarget.style.boxShadow = `6px 6px 0 ${c.black}`; }}
                     onMouseLeave={e => { e.currentTarget.style.transform = "none";
                       e.currentTarget.style.boxShadow = "none"; }}>
-                    <LabelFrame>
+                    <LabelFrame variant={idx % 7}>
                       {/* Inner top accent */}
                       <div style={{ display: "flex", height: 4 }}>
                         <div style={{ flex: 1, backgroundColor: c.rose }} />
@@ -282,7 +282,7 @@ export default function Dashboard() {
             })}
           </div>
         ) : (
-          <LabelFrame>
+          <LabelFrame variant={3}>
             <div className="text-center py-20" style={{ backgroundColor: c.cream }}>
               <Search className="h-8 w-8 mx-auto mb-4" style={{ color: c.ink, opacity: 0.2 }} />
               <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.2rem", color: c.ink }}>

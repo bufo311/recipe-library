@@ -87,11 +87,45 @@ export function makePatterns(c: ThemeColors) {
     cableTeal: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Crect width='20' height='10' fill='${enc(c.teal)}'/%3E%3Cpath d='M0 5 Q5 1 10 5 Q15 9 20 5' fill='none' stroke='${enc(c.cream)}' stroke-width='0.9' opacity='0.35'/%3E%3Cpath d='M0 5 Q5 9 10 5 Q15 1 20 5' fill='none' stroke='${enc(c.cream)}' stroke-width='0.9' opacity='0.35'/%3E%3C/svg%3E")`,
     chevronGold: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Crect width='16' height='8' fill='${enc(c.gold)}'/%3E%3Cpath d='M0 4 L4 1 L8 4 L12 1 L16 4 L12 7 L8 4 L4 7 Z' fill='none' stroke='${enc(c.black)}' stroke-width='0.7' opacity='0.35'/%3E%3C/svg%3E")`,
     powderTile: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Crect width='20' height='20' fill='${enc(c.powder)}'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='none' stroke='${enc(c.teal)}' stroke-width='0.6' opacity='0.4'/%3E%3Cpath d='M10 3 L10 17 M3 10 L17 10' stroke='${enc(c.teal)}' stroke-width='0.4' opacity='0.2'/%3E%3C/svg%3E")`,
-    /** 18×18 square tile — touching-diamond chain, identical in X and Y.
-     *  Use for LabelFrame side strips so all 4 borders look the same. */
+    spacedDiamond: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='20'%3E%3Crect width='28' height='20' fill='${enc(c.maroon)}'/%3E%3Cpolygon points='14%2C1 23%2C10 14%2C19 5%2C10' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cpath d='M14 4 L14 16 M8 10 L20 10' stroke='${enc(c.gold)}' stroke-width='0.75' opacity='0.38'/%3E%3C/svg%3E")`,
+    /** Backwards-compat alias — same as borderVariants[0] */
     diamondBorder: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.black)}'/%3E%3Cpolygon points='9%2C0 18%2C9 9%2C18 0%2C9' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cpolygon points='9%2C3 15%2C9 9%2C15 3%2C9' fill='${enc(c.gold)}' opacity='0.22'/%3E%3Ccircle cx='9' cy='9' r='2' fill='${enc(c.gold)}' opacity='0.5'/%3E%3C/svg%3E")`,
-    /** 28×20 spaced diamond on maroon — Vulcan-style header band.
-     *  Each tile has one diamond with a faint interior cross, ~10px gap between diamonds. */
-    spacedDiamond: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='20'%3E%3Crect width='28' height='20' fill='${enc(c.maroon)}'/%3E%3Cpolygon points='14%2C1 23%2C10 14%2C19 5%2C10' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cline x1='14' y1='4' x2='14' y2='16' stroke='${enc(c.gold)}' stroke-width='0.75' opacity='0.38'/%3E%3Cline x1='8' y1='10' x2='20' y2='10' stroke='${enc(c.gold)}' stroke-width='0.75' opacity='0.38'/%3E%3C/svg%3E")`,
+
+    /**
+     * 7 LabelFrame border variants — all 18×18 square tiles (work on all 4 sides),
+     * each inspired by a different Victorian encaustic tile border from the
+     * Threlkeld Granite catalogue.  Colors derive from the live theme.
+     */
+    borderVariants: [
+      // V0 — Diamond chain  (#144/#146 inspired)
+      // black bg · touching diamonds in gold outline · inner dot
+      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.black)}'/%3E%3Cpolygon points='9%2C0 18%2C9 9%2C18 0%2C9' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cpolygon points='9%2C3 15%2C9 9%2C15 3%2C9' fill='${enc(c.gold)}' opacity='0.22'/%3E%3Ccircle cx='9' cy='9' r='2' fill='${enc(c.gold)}' opacity='0.5'/%3E%3C/svg%3E")`,
+
+      // V1 — Greek Key Z-meander  (#130/#126 inspired)
+      // black bg · continuous Z-track in gold · thin outer bars
+      // Path enters left at y=9 and exits right at y=9 → tiles horizontally ✓
+      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.black)}'/%3E%3Crect width='18' height='1.5' fill='${enc(c.gold)}' opacity='0.45'/%3E%3Crect y='16.5' width='18' height='1.5' fill='${enc(c.gold)}' opacity='0.45'/%3E%3Cpath d='M 1.5%2C9 L 1.5%2C2.5 L 9%2C2.5 L 9%2C15.5 L 16.5%2C15.5 L 16.5%2C9' fill='none' stroke='${enc(c.gold)}' stroke-width='2.5' stroke-linejoin='miter'/%3E%3C/svg%3E")`,
+
+      // V2 — Diagonal herringbone  (#118/#138 inspired)
+      // maroon bg · gold SW-NE diagonal band · cream highlight stripe inside
+      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.maroon)}'/%3E%3Cpolygon points='0%2C6 6%2C0 12%2C0 0%2C12' fill='${enc(c.gold)}'/%3E%3Cpolygon points='6%2C18 18%2C6 18%2C12 12%2C18' fill='${enc(c.gold)}'/%3E%3Cpolygon points='0%2C9 9%2C0 11%2C0 0%2C11' fill='${enc(c.cream)}' opacity='0.45'/%3E%3Cpolygon points='9%2C18 18%2C9 18%2C11 11%2C18' fill='${enc(c.cream)}' opacity='0.45'/%3E%3C/svg%3E")`,
+
+      // V3 — Cross / quatrefoil  (#128 inspired)
+      // teal bg · cream cross arms · teal centre void · gold corner dots
+      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.teal)}'/%3E%3Crect x='7' y='2' width='4' height='14' fill='${enc(c.cream)}'/%3E%3Crect x='2' y='7' width='14' height='4' fill='${enc(c.cream)}'/%3E%3Ccircle cx='9' cy='9' r='3.5' fill='${enc(c.teal)}'/%3E%3Ccircle cx='0' cy='0' r='2.5' fill='${enc(c.gold)}'/%3E%3Ccircle cx='18' cy='0' r='2.5' fill='${enc(c.gold)}'/%3E%3Ccircle cx='0' cy='18' r='2.5' fill='${enc(c.gold)}'/%3E%3Ccircle cx='18' cy='18' r='2.5' fill='${enc(c.gold)}'/%3E%3C/svg%3E")`,
+
+      // V4 — Oval / egg-and-dart  (#116 inspired)
+      // cream bg · ink border bars · rose outer ellipse · cream inner void · maroon dot · gold side nodes
+      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.cream)}'/%3E%3Crect width='18' height='2' fill='${enc(c.ink)}'/%3E%3Crect y='16' width='18' height='2' fill='${enc(c.ink)}'/%3E%3Cellipse cx='9' cy='9' rx='7' ry='5' fill='${enc(c.rose)}' opacity='0.4'/%3E%3Cellipse cx='9' cy='9' rx='5' ry='3.5' fill='${enc(c.cream)}'/%3E%3Ccircle cx='9' cy='9' r='1.8' fill='${enc(c.maroon)}' opacity='0.7'/%3E%3Ccircle cx='0' cy='9' r='2' fill='${enc(c.gold)}'/%3E%3Ccircle cx='18' cy='9' r='2' fill='${enc(c.gold)}'/%3E%3C/svg%3E")`,
+
+      // V5 — Circle-star band  (#162/#163 inspired)
+      // maroon bg · gold top+bottom bars · gold circle outline · inner crosshair · centre dot
+      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.maroon)}'/%3E%3Crect width='18' height='2.5' fill='${enc(c.gold)}'/%3E%3Crect y='15.5' width='18' height='2.5' fill='${enc(c.gold)}'/%3E%3Ccircle cx='9' cy='9' r='5' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cpath d='M9 4 L9 14 M4 9 L14 9' stroke='${enc(c.gold)}' stroke-width='1' opacity='0.5'/%3E%3Ccircle cx='9' cy='9' r='1.5' fill='${enc(c.gold)}' opacity='0.6'/%3E%3C/svg%3E")`,
+
+      // V6 — S-wave / cable twist  (#148 inspired)
+      // black bg · cream outer S-wave · gold inner S-wave
+      // Both paths enter + exit at y=9 on left/right edges → tiles horizontally ✓
+      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.black)}'/%3E%3Cpath d='M 0%2C9 Q 4.5%2C0 9%2C9 Q 13.5%2C18 18%2C9' fill='none' stroke='${enc(c.cream)}' stroke-width='3'/%3E%3Cpath d='M 0%2C9 Q 4.5%2C2 9%2C9 Q 13.5%2C16 18%2C9' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5' opacity='0.8'/%3E%3C/svg%3E")`,
+    ] as string[],
   };
 }

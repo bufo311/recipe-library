@@ -97,7 +97,7 @@ export default function Reference() {
       <div className="container mx-auto px-4 py-10 max-w-3xl">
 
         {/* Page title */}
-        <LabelFrame style={{ marginBottom: 28 }}>
+        <LabelFrame style={{ marginBottom: 28 }} variant={4}>
           <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />
           <div style={{ height: 3, backgroundColor: c.rose }} />
           <div style={{ backgroundColor: c.sage, padding: "0.75rem 1.5rem", borderBottom: `3px solid ${c.black}` }}>
@@ -156,7 +156,7 @@ export default function Reference() {
                   const rowA = catIdx % 2 === 0 ? c.cream : c.parch;
                   const rowB = catIdx % 2 === 0 ? c.parch : c.cream;
                   return (
-                  <LabelFrame key={cat.label}>
+                  <LabelFrame key={cat.label} variant={catIdx % 7}>
                     <div style={{ height: 10, backgroundImage: p.cableTeal, backgroundRepeat: "repeat-x" }} />
                     <div style={{ backgroundColor: c.teal, padding: "0.3rem 0.85rem",
                       borderBottom: `2px solid ${c.black}` }}>
