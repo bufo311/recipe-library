@@ -75,5 +75,8 @@ export function makePatterns(c: ThemeColors) {
     /** 18×18 square tile — touching-diamond chain, identical in X and Y.
      *  Use for LabelFrame side strips so all 4 borders look the same. */
     diamondBorder: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect width='18' height='18' fill='${enc(c.black)}'/%3E%3Cpolygon points='9%2C0 18%2C9 9%2C18 0%2C9' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cpolygon points='9%2C3 15%2C9 9%2C15 3%2C9' fill='${enc(c.gold)}' opacity='0.22'/%3E%3Ccircle cx='9' cy='9' r='2' fill='${enc(c.gold)}' opacity='0.5'/%3E%3C/svg%3E")`,
+    /** 28×20 spaced diamond on maroon — Vulcan-style header band.
+     *  Each tile has one diamond with a faint interior cross, ~10px gap between diamonds. */
+    spacedDiamond: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='20'%3E%3Crect width='28' height='20' fill='${enc(c.maroon)}'/%3E%3Cpolygon points='14%2C1 23%2C10 14%2C19 5%2C10' fill='none' stroke='${enc(c.gold)}' stroke-width='1.5'/%3E%3Cline x1='14' y1='4' x2='14' y2='16' stroke='${enc(c.gold)}' stroke-width='0.75' opacity='0.38'/%3E%3Cline x1='8' y1='10' x2='20' y2='10' stroke='${enc(c.gold)}' stroke-width='0.75' opacity='0.38'/%3E%3C/svg%3E")`,
   };
 }
