@@ -302,7 +302,8 @@ export default function RecipeDetail() {
                       {(idx + 1).toString().padStart(2, "0")}
                     </span>
                     <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.15rem",
-                      lineHeight: 1.78, color: c.ink }}>{instruction}</p>
+                      lineHeight: 1.78, color: c.ink, minWidth: 0, overflowWrap: "break-word",
+                      wordBreak: "break-word" }}>{instruction}</p>
                   </li>
                 ))}
               </ol>
