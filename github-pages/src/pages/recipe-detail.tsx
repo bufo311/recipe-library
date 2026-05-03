@@ -23,24 +23,23 @@ import banner1Svg from "@/assets/banner-1.svg";
 import banner2Svg from "@/assets/banner-2.svg";
 import banner3Svg from "@/assets/banner-3.svg";
 
-// Each banner's text-curve is hand-tuned to follow its ribbon shape (viewBox 0 0 288 144).
-// To add a new banner, append { src, curve } here and it'll automatically join the rotation.
-const BANNERS: { src: string; curve: string }[] = [
-  { src: banner1Svg, curve: "M 59.8 94.9 C 116.2 109.2 185.1 23.1 237.4 59.6" },
-  // TODO: tune curves for banners 2 and 3 (placeholder = flat horizontal across middle)
-  { src: banner2Svg, curve: "M 50 72 L 238 72" },
-  { src: banner3Svg, curve: "M 50 72 L 238 72" },
+// Per-banner text-curve and sm+ overhang placement (viewBox 0 0 288 144).
+// To add a new banner, append an entry and it'll automatically join the rotation.
+type Banner = { src: string; curve: string; leftPct: number; topPct: number; widthPct: number };
+const BANNERS: Banner[] = [
+  { src: banner1Svg, curve: "M 61.8 91.6 C 118.2 103.8 187.1 19.8 239.4 56.3", leftPct: -26.7, topPct: -14.7, widthPct: 94.2 },
+  { src: banner2Svg, curve: "M 45.4 90.4 C 110.0 118.6 177.3 60.9 238.0 68.7", leftPct: -24.6, topPct: -21.9, widthPct: 96.1 },
+  { src: banner3Svg, curve: "M 46.8 53.6 C 116.3 25.7 167.9 99.3 237.4 84.7", leftPct: -27.4, topPct: -10.0, widthPct: 99.4 },
 ];
 
-function pickBanner(seed: number) {
+export function pickBanner(seed: number): Banner {
   const s = ((seed | 0) >>> 0) || 1;
   // Single-step LCG to spread sequential ids across banner choices.
   const mixed = (Math.imul(s, 1664525) + 1013904223) >>> 0;
   return BANNERS[mixed % BANNERS.length];
 }
 
-function TitleBanner({ title, c, seed }: { title: string; c: ThemeColors; seed: number }) {
-  const banner = pickBanner(seed);
+function TitleBanner({ title, c, banner }: { title: string; c: ThemeColors; banner: Banner }) {
   const pathRef = useRef<SVGPathElement>(null);
   const textRef = useRef<SVGTextElement>(null);
   const len = title.length;
@@ -162,9 +161,16 @@ export default function RecipeDetail() {
           <div className="relative overflow-visible px-4 sm:px-8 py-6 sm:min-h-[320px]"
             style={{ backgroundColor: c.sage }}>
             {/* Banner: in-flow on mobile (full width, no overhang), absolute BANNER 1 placement on sm+ */}
-            <div className="relative w-auto -mx-4 pointer-events-none z-30 mb-3 sm:mx-0 sm:mb-0 sm:absolute sm:left-[-33%] sm:top-[-14.3%] sm:w-[87.5%]">
-              <TitleBanner title={recipe.title} c={c} seed={recipe.id} />
-            </div>
+            {(() => {
+              const banner = pickBanner(recipe.id);
+              return (
+                <div
+                  className="relative w-auto -mx-4 pointer-events-none z-30 mb-3 sm:mx-0 sm:mb-0 sm:absolute sm:left-[var(--bnr-l)] sm:top-[var(--bnr-t)] sm:w-[var(--bnr-w)]"
+                  style={{ "--bnr-l": `${banner.leftPct}%`, "--bnr-t": `${banner.topPct}%`, "--bnr-w": `${banner.widthPct}%` } as React.CSSProperties}>
+                  <TitleBanner title={recipe.title} c={c} banner={banner} />
+                </div>
+              );
+            })()}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start items-center gap-4 relative">
               <div className="flex-1 order-2 sm:order-1 sm:min-h-[90px]">
                 {recipe.sourceUrl && (
