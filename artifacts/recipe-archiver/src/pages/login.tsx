@@ -23,21 +23,16 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center">
-      {/* Man's head — the login card floats inside the open mouth */}
       <div style={{ position: "relative", width: "min(100vw, 460px)" }}>
-        <img
-          src={mansHeadUrl}
-          alt=""
-          style={{ width: "100%", display: "block" }}
-        />
 
-        {/* Card positioned inside the open mouth (~40-82% down, centered) */}
+        {/* Card sits BEHIND the SVG — visible through the transparent mouth */}
         <div style={{
           position: "absolute",
           top: "40%",
           left: "50%",
           transform: "translateX(-50%)",
           width: "57%",
+          zIndex: 1,
         }}>
           <LabelFrame className="w-full" variant={0}>
 
@@ -96,6 +91,15 @@ export default function LoginPage() {
 
           </LabelFrame>
         </div>
+
+        {/* Head SVG on top (z-index 2) — transparent mouth reveals the card below.
+            pointer-events: none keeps the form fully interactive. */}
+        <img
+          src={mansHeadUrl}
+          alt=""
+          style={{ width: "100%", display: "block", position: "relative", zIndex: 2, pointerEvents: "none" }}
+        />
+
       </div>
 
       <p className="mt-4" style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.6rem",
