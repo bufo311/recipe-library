@@ -13,7 +13,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[100dvh] flex flex-col">
 
-      <header style={{ backgroundColor: c.black }}>
+      <header style={{ backgroundColor: c.black, paddingTop: "env(safe-area-inset-top)" }}>
 
         {/* ── Very top accent rule ── */}
         <div style={{ display: "flex", height: 4 }}>
@@ -35,18 +35,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div style={{ height: 3, backgroundColor: c.teal }} />
 
         {/* ── Main nav bar ── */}
-        <div className="container mx-auto px-4 flex items-stretch" style={{ minHeight: 60 }}>
+        <div className="container mx-auto px-4 flex flex-col md:flex-row md:items-stretch items-center gap-2 md:gap-0 py-3 md:py-0" style={{ minHeight: 60 }}>
 
           {/* Logo column */}
-          <div style={{
+          <div className="md:-ml-4 md:mr-6 md:border-r-2 md:self-stretch w-full md:w-auto flex items-center justify-center" style={{
             backgroundColor: c.maroon,
-            padding: "0 1.5rem",
-            display: "flex", alignItems: "center",
-            marginLeft: -16, marginRight: 24,
-            borderRight: `2px solid ${c.gold}`,
+            padding: "0.5rem 1.25rem",
+            borderColor: c.gold,
           }}>
             <Link href="/" style={{ textDecoration: "none" }}>
-              <div style={{ textAlign: "center", padding: "0.25rem 0" }}>
+              <div style={{ textAlign: "center", padding: "0.15rem 0" }}>
 
                 {/* "Est. 2026" — tiny spaced caps above */}
                 <span style={{
@@ -61,7 +59,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <span style={{
                   display: "block",
                   fontFamily: "'Playfair Display', serif",
-                  fontSize: "2.4rem", fontWeight: 900,
+                  fontSize: "clamp(1.6rem, 6vw, 2.4rem)", fontWeight: 900,
                   letterSpacing: "0.08em", textTransform: "uppercase",
                   color: c.gold,
                   lineHeight: 0.95,
@@ -103,19 +101,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Nav + actions */}
-          <div style={{
-            flex: 1, display: "flex", alignItems: "center",
-            justifyContent: "space-between",
-            position: "relative", overflow: "hidden",
-          }}>
-            {/* Subtle diagonal teal wash */}
-            <div style={{
+          <div className="flex-1 w-full flex flex-col md:flex-row items-center md:justify-between gap-2 md:gap-0 relative md:overflow-hidden">
+            {/* Subtle diagonal teal wash — desktop only */}
+            <div className="hidden md:block" style={{
               position: "absolute", inset: 0, pointerEvents: "none",
               background: `linear-gradient(105deg, transparent 28%, ${c.teal} 28%, ${c.teal} 72%, transparent 72%)`,
               opacity: 0.10,
             }} />
 
-            <nav className="flex items-center gap-0 relative z-10">
+            <nav className="flex items-center justify-center flex-wrap gap-0 relative z-10">
               {[
                 { href: "/",           label: "Stock"         },
                 { href: "/reference",  label: "Reference"     },
@@ -125,7 +119,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Link href={item.href} style={{
                     fontFamily: "'Playfair Display', serif", fontWeight: 700,
                     letterSpacing: "0.1em", textTransform: "uppercase", fontSize: "0.68rem",
-                    padding: "0.3rem 0.9rem",
+                    padding: "0.3rem 0.7rem",
                     color: location === item.href ? c.gold : c.cream,
                     borderBottom: location === item.href ? `2px solid ${c.gold}` : "2px solid transparent",
                     transition: "color 0.15s",
@@ -139,7 +133,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               ))}
             </nav>
 
-            <div className="flex items-center gap-2 relative z-10 mr-2">
+            <div className="flex items-center gap-2 relative z-10 md:mr-2">
               <ThemeEditorButton />
               <button onClick={logout} title="Sign out"
                 style={{ color: c.cream, opacity: 0.4, transition: "opacity 0.15s" }}
