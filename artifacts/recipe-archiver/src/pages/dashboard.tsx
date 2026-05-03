@@ -126,8 +126,8 @@ export default function Dashboard() {
           {/* Body */}
           <div style={{ backgroundColor: c.parch, padding: "0.85rem 1rem 1rem" }}>
 
-            {/* Added by row */}
-            {(facets?.cooks?.length ?? 0) > 0 && (
+            {/* Added by row — show if myCook is set or any cook facets exist */}
+            {(myCook || (facets?.cooks?.length ?? 0) > 0) && (
               <div className="mb-4">
                 <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
                   textTransform: "uppercase", letterSpacing: "0.22em", color: c.ink,
@@ -135,12 +135,12 @@ export default function Dashboard() {
                   Added by
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {myCook && facets!.cooks.includes(myCook) && (
+                  {myCook && (
                     <FilterPill active={filters.cook === myCook} onClick={() => toggleFilter("cook", myCook)}>
                       ★ My Recipes
                     </FilterPill>
                   )}
-                  {facets!.cooks
+                  {(facets?.cooks ?? [])
                     .filter(v => v !== myCook)
                     .map(v => (
                       <FilterPill key={v} active={filters.cook === v} onClick={() => toggleFilter("cook", v)}>{v}</FilterPill>
