@@ -14,7 +14,11 @@ export default function LoginPage() {
     setLoading(true);
     const err = await login(password);
     setLoading(false);
-    if (err) setError(err);
+    if (err) {
+      setError(err);
+    } else {
+      window.location.replace(import.meta.env.BASE_URL || "/");
+    }
   }
 
   return (

@@ -10,7 +10,11 @@ export default function LoginPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const err = login(password);
-    if (err) setError(err);
+    if (err) {
+      setError(err);
+    } else {
+      window.location.replace(import.meta.env.BASE_URL || "/");
+    }
   }
 
   return (
