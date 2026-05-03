@@ -70,7 +70,7 @@ export function UrlImporter() {
           fontFamily: "'Playfair Display', serif", fontSize: "0.8rem",
           fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em",
           color: c.cream, textShadow: MILLS_SHADOW,
-        }}>Import a Receipt</h2>
+        }}>Import a Recipe</h2>
       </div>
 
       {/* Body */}
