@@ -127,7 +127,7 @@ export default function RecipeDetail() {
           <div style={{ height: 3, backgroundColor: c.rose }} />
 
           {/* Title zone */}
-          <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "visible", minHeight: 170 }}>
+          <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "visible", minHeight: 320 }}>
             {/* Banner hangs off the left edge, right end stops near card midpoint */}
             <div style={{ position: "absolute", left: "-29.5%", top: "-28.2%", width: "87.5%",
               pointerEvents: "none", zIndex: 3 }}>

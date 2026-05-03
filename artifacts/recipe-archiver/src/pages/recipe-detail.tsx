@@ -123,7 +123,7 @@ export default function RecipeDetail() {
           <div style={{ height: 3, backgroundColor: c.rose }} />
 
           {/* Title zone */}
-          <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "visible", minHeight: 170 }}>
+          <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "visible", minHeight: 320 }}>
             <div style={{ position: "absolute", inset: 0, pointerEvents: "none",
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='2' cy='2' r='0.5' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")` }} />
             {/* Banner hangs off the left edge, right end stops near card midpoint */}
