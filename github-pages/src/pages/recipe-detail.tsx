@@ -7,15 +7,36 @@ import {
 import { useLocation, useParams, Link } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Edit3, Trash2, Clock, Users, ExternalLink, Scale } from "lucide-react";
+import { Loader2, Edit3, Trash2, ExternalLink, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { useTheme } from "@/lib/theme-context";
+
+function WaxSeal({ lines, c }: { lines: string[]; c: Record<string, string> }) {
+  if (!lines.length) return null;
+  return (
+    <div style={{
+      backgroundColor: c.maroon, color: c.cream, borderRadius: "50%",
+      width: 84, height: 84, display: "flex", alignItems: "center", justifyContent: "center",
+      textAlign: "center", fontSize: "0.56rem", lineHeight: 1.3, textTransform: "uppercase",
+      letterSpacing: "1px", boxShadow: "inset 0 0 14px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.4)",
+      border: `3px solid rgba(0,0,0,0.4)`, outline: `2px solid ${c.gold}`, outlineOffset: -7,
+      transform: "rotate(-10deg)", fontWeight: "bold",
+      fontFamily: "'Playfair Display', serif", padding: "0.5rem", flexShrink: 0,
+    }}>
+      {lines.map((l, i) => (
+        <span key={i}>
+          {i > 0 && <><br /><span style={{ opacity: 0.5 }}>&amp;</span><br /></>}{l}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export default function RecipeDetail() {
   const { id } = useParams();
@@ -24,42 +45,33 @@ export default function RecipeDetail() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showGrams, setShowGrams] = useState(false);
+  const { colors: c, patterns: p } = useTheme();
+  const MILLS_SHADOW = `1px 1px 0 rgba(0,0,0,0.5), 2px 2px 0 rgba(0,0,0,0.3)`;
 
   const { data: recipe, isLoading } = useGetRecipe(recipeId, {
     query: { enabled: !!recipeId, queryKey: getGetRecipeQueryKey(recipeId) },
   });
-
   const deleteRecipe = useDeleteRecipe({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListRecipesQueryKey() });
-        toast({ title: "Recipe deleted" });
-        setLocation("/");
-      },
+      onSuccess: () => { queryClient.invalidateQueries({ queryKey: getListRecipesQueryKey() });
+        toast({ title: "Recipe deleted" }); setLocation("/"); },
       onError: () => toast({ title: "Failed to delete recipe", variant: "destructive" }),
     },
   });
-
   const convertToGrams = useConvertToGrams({
     mutation: {
       onSuccess: () => setShowGrams(true),
       onError: () => toast({ title: "Failed to convert measurements", variant: "destructive" }),
     },
   });
-
   const handleToggleGrams = () => {
     if (showGrams) { setShowGrams(false); return; }
     if (convertToGrams.data) { setShowGrams(true); return; }
     convertToGrams.mutate({ id: recipeId });
   };
 
-  if (isLoading) {
-    return <Layout><div className="container mx-auto px-4 py-24 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
-  }
-
-  if (!recipe) {
-    return <Layout><div className="container mx-auto px-4 py-24 text-center"><h1 className="text-2xl font-serif">Recipe not found</h1></div></Layout>;
-  }
+  if (isLoading) return <Layout><div className="flex justify-center py-24"><Loader2 className="h-8 w-8 animate-spin" style={{ color: c.teal }} /></div></Layout>;
+  if (!recipe) return <Layout><div className="text-center py-24"><h1 className="text-2xl font-serif">Recipe not found</h1></div></Layout>;
 
   const formatWithOriginal = (converted: string, original: string): React.ReactNode => {
     const volumePattern = /([\d\s½⅓⅔¼¾⅛⅜⅝⅞\/\.]+\s*(?:cups?|tablespoons?|teaspoons?|tbsps?|tsps?))/i;
@@ -67,129 +79,198 @@ export default function RecipeDetail() {
     const gramMatch = converted.match(/^(\d+g)\s+(.+)$/);
     if (!gramMatch) return converted;
     const [, grams, ingredientName] = gramMatch;
-    return (
-      <>
-        <span>{grams}</span>
-        {volumeMatch && <span className="text-muted-foreground/60 text-sm"> ({volumeMatch[1].trim()})</span>}
-        <span> {ingredientName}</span>
-      </>
-    );
+    return (<><span>{grams}</span>{volumeMatch && <span style={{ opacity: 0.6, fontSize: "0.85rem" }}> ({volumeMatch[1].trim()})</span>}<span> {ingredientName}</span></>);
   };
-
   const getDisplayedIngredient = (ingredient: string, index: number): React.ReactNode => {
     if (!showGrams || !convertToGrams.data) return ingredient;
-    const convertedInfo = convertToGrams.data.convertedIngredients[index];
-    if (convertedInfo?.hasConversion && convertedInfo.converted) {
-      return formatWithOriginal(convertedInfo.converted, ingredient);
-    }
+    const ci = convertToGrams.data.convertedIngredients[index];
+    if (ci?.hasConversion && ci.converted) return formatWithOriginal(ci.converted, ingredient);
     return ingredient;
   };
 
+  const sealLines = [recipe.course, recipe.cuisine ?? recipe.category].filter((v): v is string => !!v).slice(0, 2);
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="flex justify-between items-start mb-8 gap-4 flex-wrap">
-          <div>
-            {recipe.category && <Badge variant="secondary" className="mb-4 font-normal tracking-wide uppercase text-xs">{recipe.category}</Badge>}
-            <h1 className="text-4xl md:text-5xl font-serif text-foreground font-bold tracking-tight">{recipe.title}</h1>
-            {recipe.sourceUrl && (
-              <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2">
-                Original Recipe <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
+      <div className="container mx-auto px-4 py-10 max-w-4xl">
+        <div style={{ border: `3px solid ${c.black}` }}>
+
+          <div style={{ height: 12, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x" }} />
+          <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />
+          <div style={{ height: 3, backgroundColor: c.rose }} />
+
+          {/* Title */}
+          <div style={{ backgroundColor: c.sage, padding: "1.5rem 2rem", position: "relative", overflow: "hidden" }}>
+            <div className="flex justify-between items-start gap-4 relative">
+              <div className="flex-1">
+                <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.55rem",
+                  textTransform: "uppercase", letterSpacing: "0.35em", color: c.cream, opacity: 0.65, marginBottom: 6 }}>
+                  Fine Culinary Receipts
+                </p>
+                <h1 style={{ fontFamily: "'Playfair Display', serif",
+                  fontSize: "clamp(2rem,5vw,3.5rem)", fontWeight: 900,
+                  color: c.cream, textShadow: MILLS_SHADOW, lineHeight: 1.1 }}>
+                  {recipe.title}
+                </h1>
+                {recipe.sourceUrl && (
+                  <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 mt-2"
+                    style={{ fontSize: "0.72rem", color: c.gold, fontFamily: "'Outfit', sans-serif", opacity: 0.85 }}>
+                    Original Source <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
+              <div className="flex flex-col items-end gap-3 shrink-0">
+                {sealLines.length > 0 && <WaxSeal lines={sealLines} c={c} />}
+                <div className="flex gap-2 mt-1">
+                  <Button variant="ghost" size="sm" asChild
+                    style={{ color: c.cream, border: `1px solid ${c.cream}`, borderRadius: 0,
+                      fontFamily: "'Outfit', sans-serif", fontSize: "0.68rem", opacity: 0.8 }}>
+                    <Link href={`/recipe/${recipe.id}/edit`}><Edit3 className="h-3.5 w-3.5 mr-1" />Edit</Link>
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm"
+                        style={{ color: c.rose, border: `1px solid ${c.rose}`, borderRadius: 0,
+                          fontFamily: "'Outfit', sans-serif", fontSize: "0.68rem" }}>
+                        <Trash2 className="h-3.5 w-3.5 mr-1" />Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Recipe?</AlertDialogTitle>
+                        <AlertDialogDescription>This will permanently remove the receipt from your collection.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction style={{ backgroundColor: c.maroon, color: c.cream }}
+                          onClick={() => deleteRecipe.mutate({ id: recipe.id })}>
+                          {deleteRecipe.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/recipe/${recipe.id}/edit`}><Edit3 className="h-4 w-4 mr-2" /> Edit</Link>
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+
+          <div style={{ height: 3, backgroundColor: c.rose }} />
+          <div style={{ height: 10, backgroundImage: p.cableTeal, backgroundRepeat: "repeat-x" }} />
+          <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x" }} />
+
+          {/* Info band */}
+          <div style={{ backgroundColor: c.teal, padding: "0.5rem 2rem",
+            borderTop: `2px solid ${c.black}`, borderBottom: `2px solid ${c.black}` }}>
+            <div className="flex gap-6 flex-wrap">
+              {[
+                { label: "Course",  val: recipe.course     },
+                { label: "Cuisine", val: recipe.cuisine    },
+                { label: "Prep",    val: recipe.prepTime   },
+                { label: "Cook",    val: recipe.cookTime   },
+                { label: "Yield",   val: recipe.yields     },
+              ].filter(x => x.val).map((x, i) => (
+                <div key={x.label} className={i > 0 ? "border-l border-white border-opacity-20 pl-4" : ""}>
+                  <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.5rem",
+                    textTransform: "uppercase", letterSpacing: "0.15em", color: c.cream, opacity: 0.65 }}>{x.label}</p>
+                  <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700,
+                    fontSize: "0.82rem", color: c.cream }}>{x.val}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {recipe.imagePath && (
+            <div style={{ backgroundColor: c.powder, overflow: "hidden", maxHeight: 320,
+              borderBottom: `3px solid ${c.black}`, backgroundImage: p.powderTile }}>
+              <img src={recipe.imagePath} alt={recipe.title}
+                className="w-full object-cover" style={{ filter: "sepia(0.1) contrast(1.05)" }} />
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-12">
+            {/* Left column */}
+            <div className="md:col-span-4" style={{ backgroundColor: c.maroon, borderRight: `3px solid ${c.black}` }}>
+              <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x",
+                borderBottom: `1px solid ${c.black}` }} />
+              <div style={{ backgroundColor: c.black, padding: "0.45rem 1rem",
+                borderBottom: `2px solid ${c.gold}`,
+                display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.85rem",
+                  fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em",
+                  color: c.cream, textShadow: MILLS_SHADOW }}>The Manifest</h2>
+                <Button variant="ghost" size="sm" onClick={handleToggleGrams}
+                  disabled={convertToGrams.isPending}
+                  style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.6rem",
+                    color: c.gold, backgroundColor: "transparent", padding: "0.1rem 0.3rem" }}>
+                  {convertToGrams.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Scale className="h-3 w-3 mr-1" />}
+                  {showGrams ? "Volume" : "Grams"}
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Recipe?</AlertDialogTitle>
-                  <AlertDialogDescription>This action cannot be undone. This will permanently delete your saved recipe.</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    onClick={() => deleteRecipe.mutate({ id: recipe.id })}>
-                    {deleteRecipe.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </div>
-
-        {recipe.imagePath && (
-          <div className="w-full aspect-[21/9] md:aspect-[3/1] rounded-2xl overflow-hidden mb-12 bg-muted/50 border border-border/50">
-            <img src={recipe.imagePath} alt={recipe.title} className="w-full h-full object-cover" />
-          </div>
-        )}
-
-        <div className="flex flex-wrap gap-6 md:gap-12 py-6 mb-12 border-y border-border/50 text-sm">
-          {(recipe.prepTime || recipe.cookTime || recipe.totalTime) && (
-            <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-primary opacity-80" />
-              <div>
-                {recipe.prepTime && <p><span className="font-medium text-foreground">Prep:</span> {recipe.prepTime}</p>}
-                {recipe.cookTime && <p><span className="font-medium text-foreground">Cook:</span> {recipe.cookTime}</p>}
-                {recipe.totalTime && <p><span className="font-medium text-foreground">Total:</span> {recipe.totalTime}</p>}
               </div>
+              <ul className="space-y-3 p-5">
+                {recipe.ingredients.map((ingredient, idx) => (
+                  <li key={idx} className="flex gap-2 leading-relaxed">
+                    <span style={{ color: c.gold, opacity: 0.7, marginTop: 2, flexShrink: 0 }}>—</span>
+                    <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem",
+                      color: c.cream, opacity: 0.92 }}>
+                      {getDisplayedIngredient(ingredient, idx)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x",
+                borderTop: `1px solid ${c.black}`, marginTop: 8 }} />
             </div>
-          )}
-          {recipe.yields && (
-            <div className="flex items-center gap-3">
-              <Users className="h-5 w-5 text-primary opacity-80" />
-              <div>
-                <p className="font-medium text-foreground">Yields</p>
-                <p className="text-muted-foreground">{recipe.yields}</p>
-              </div>
-            </div>
-          )}
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-24">
-          <div className="md:col-span-4 space-y-8">
-            <div className="flex items-center justify-between border-b border-border/50 pb-2">
-              <h2 className="text-2xl font-serif text-primary">Ingredients</h2>
-              <Button variant="ghost" size="sm" onClick={handleToggleGrams}
-                className={showGrams ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}
-                disabled={convertToGrams.isPending}>
-                {convertToGrams.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Scale className="h-4 w-4 mr-2" />}
-                {showGrams ? "Show Volume" : "To Grams"}
-              </Button>
-            </div>
-            <ul className="space-y-3 font-serif text-lg text-foreground/90">
-              {recipe.ingredients.map((ingredient, idx) => (
-                <li key={idx} className="flex gap-3 leading-relaxed">
-                  <span className="text-primary/60 mt-1.5">•</span>
-                  <span>{getDisplayedIngredient(ingredient, idx)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="md:col-span-8 space-y-8">
-            <h2 className="text-2xl font-serif text-primary border-b border-border/50 pb-2">Instructions</h2>
-            <ol className="space-y-8 text-foreground/90">
-              {recipe.instructions.map((instruction, idx) => (
-                <li key={idx} className="flex gap-6">
-                  <span className="font-serif text-3xl text-primary/30 font-medium shrink-0 pt-0.5 select-none">{(idx + 1).toString().padStart(2, "0")}</span>
-                  <p className="text-lg leading-relaxed font-sans">{instruction}</p>
-                </li>
-              ))}
-            </ol>
-            {recipe.notes && (
-              <div className="mt-12 p-6 bg-secondary/10 rounded-xl border border-secondary/20">
-                <h3 className="text-xl font-serif text-secondary-foreground font-medium mb-3">Chef's Notes</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">{recipe.notes}</p>
+            {/* Right column */}
+            <div className="md:col-span-8" style={{ backgroundColor: c.cream }}>
+              <div style={{ height: 12, backgroundImage: p.eggDartDark, backgroundRepeat: "repeat-x",
+                borderBottom: `1px solid ${c.black}` }} />
+              <div style={{ backgroundColor: c.sage, padding: "0.45rem 1.25rem",
+                borderBottom: `2px solid ${c.black}`, textAlign: "center" }}>
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.85rem",
+                  fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em",
+                  color: c.cream, textShadow: MILLS_SHADOW }}>Method of Preparation</h2>
               </div>
-            )}
+              <ol className="space-y-7 p-6">
+                {recipe.instructions.map((instruction, idx) => (
+                  <li key={idx} className="flex gap-5">
+                    <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.2rem",
+                      color: c.maroon, opacity: 0.2, fontWeight: 900, flexShrink: 0,
+                      lineHeight: 1, userSelect: "none" }}>
+                      {(idx + 1).toString().padStart(2, "0")}
+                    </span>
+                    <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.15rem",
+                      lineHeight: 1.78, color: c.ink }}>{instruction}</p>
+                  </li>
+                ))}
+              </ol>
+              {recipe.notes && (
+                <div style={{ margin: "0 1.5rem 1.5rem", padding: "1.1rem",
+                  backgroundColor: c.parch, border: `2px solid ${c.gold}`,
+                  boxShadow: `4px 4px 0 ${c.maroon}`, transform: "rotate(0.35deg)" }}>
+                  <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.9rem",
+                    fontWeight: 700, color: c.maroon, borderBottom: `1px solid ${c.ink}`,
+                    paddingBottom: "0.25rem", marginBottom: "0.5rem", display: "inline-block" }}>
+                    Proprietor's Notes:
+                  </h3>
+                  <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
+                    fontSize: "1.08rem", color: c.ink, lineHeight: 1.72, whiteSpace: "pre-wrap" }}>
+                    {recipe.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ height: 12, backgroundImage: p.eggDartMaroon, backgroundRepeat: "repeat-x" }} />
+          <div style={{ height: 8, backgroundImage: p.chevronGold, backgroundRepeat: "repeat-x" }} />
+          <div style={{ display: "flex", height: 6 }}>
+            <div style={{ flex: 1, backgroundColor: c.rose  }} />
+            <div style={{ flex: 2, backgroundColor: c.gold  }} />
+            <div style={{ flex: 1, backgroundColor: c.teal  }} />
+            <div style={{ flex: 2, backgroundColor: c.gold  }} />
+            <div style={{ flex: 1, backgroundColor: c.rose  }} />
           </div>
         </div>
       </div>
