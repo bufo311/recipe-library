@@ -23,7 +23,6 @@ export default function Dashboard() {
   const debouncedSearch        = useDebounce(search, 300);
   const [filters, setFilters] = useState<Filters>({ course: null, cuisine: null, attribute: null, cook: null });
   const activeFilterCount      = Object.values(filters).filter(Boolean).length;
-  const myCook = typeof window !== "undefined" ? localStorage.getItem("spencer-cook") : null;
 
   const { data: recipes, isLoading } = useListRecipes(
     { search: debouncedSearch || undefined, course: filters.course ?? undefined,
@@ -126,8 +125,8 @@ export default function Dashboard() {
           {/* Body */}
           <div style={{ backgroundColor: c.parch, padding: "0.85rem 1rem 1rem" }}>
 
-            {/* Added by row — show if myCook is set or any cook facets exist */}
-            {(myCook || (facets?.cooks?.length ?? 0) > 0) && (
+            {/* Added by row */}
+            {(facets?.cooks?.length ?? 0) > 0 && (
               <div className="mb-4">
                 <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: "0.52rem",
                   textTransform: "uppercase", letterSpacing: "0.22em", color: c.ink,
@@ -135,16 +134,9 @@ export default function Dashboard() {
                   Added by
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {myCook && (
-                    <FilterPill active={filters.cook === myCook} onClick={() => toggleFilter("cook", myCook)}>
-                      ★ My Recipes
-                    </FilterPill>
-                  )}
-                  {(facets?.cooks ?? [])
-                    .filter(v => v !== myCook)
-                    .map(v => (
-                      <FilterPill key={v} active={filters.cook === v} onClick={() => toggleFilter("cook", v)}>{v}</FilterPill>
-                    ))}
+                  {facets!.cooks.map(v => (
+                    <FilterPill key={v} active={filters.cook === v} onClick={() => toggleFilter("cook", v)}>{v}</FilterPill>
+                  ))}
                 </div>
                 <div style={{ marginTop: "0.85rem", height: 1, backgroundColor: c.ink, opacity: 0.12 }} />
               </div>
