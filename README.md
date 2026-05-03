@@ -402,6 +402,50 @@ The readout at the top shows live values; copy them into the `BANNERS` registry 
 
 ---
 
+## Surviving without Replit
+
+The whole point of the GitHub Pages build is that it outlives Replit. If you delete your Replit account tomorrow, the static site keeps running unchanged — it's just HTML and JS hosted by GitHub talking straight to Supabase.
+
+**What still works with no action:**
+
+- Reading, creating, editing, deleting recipes via `https://<your-user>.github.io/<repo>/`
+- Image uploads (browser → Supabase Storage, anon key)
+- URL scraping (browser → public CORS proxy → target site)
+- Gram conversion (runs entirely in the browser)
+
+**What you lose:**
+
+- The `*.replit.app` deployment (Express + Drizzle backend)
+- The dev environment itself — to rebuild the static site after future code changes you'll need any machine with Node + pnpm/npm
+- The shared secrets in `.replit` under `[userenv.shared]` (`SUPABASE_SERVICE_ROLE_KEY`, `APP_PASSWORD`). The static site doesn't use the service-role key, so this doesn't break anything
+
+**Pre-deletion checklist:**
+
+1. Push the latest `docs/` build to GitHub:
+   ```bash
+   cd github-pages && npm run build
+   cd .. && git add docs/ && git commit -m "Build static site" && git push
+   ```
+2. In your GitHub repo → **Settings → Pages**, confirm: Source = **Deploy from a branch**, Branch = `main`, Folder = `/docs`. Visit the live URL to confirm it loads.
+3. Clone the repo somewhere off Replit (your laptop, another VM) so you can edit and rebuild later.
+4. **Rotate the Supabase service-role key** in the Supabase dashboard, since it was committed to `.replit`. Generate a new one and store it somewhere private — you don't need it for the static site, only if you ever stand the Express backend back up.
+5. Make sure your `github-pages/.env` values (especially `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`) are saved somewhere outside Replit — they're needed for any future rebuild.
+
+**Rebuilding the static site from a fresh clone (no Replit needed):**
+
+```bash
+git clone https://github.com/<your-user>/<repo>.git
+cd <repo>/github-pages
+cp .env.example .env        # paste the saved Supabase values
+npm install
+npm run build               # writes to ../docs/
+cd .. && git add docs/ && git commit -m "Rebuild" && git push
+```
+
+That's it. Supabase is the only piece you actually depend on long-term.
+
+---
+
 ## Common gotchas
 
 - **"`pnpm dev` does nothing at the root"** — by design. Each artifact runs through its own workflow. Use `pnpm --filter @workspace/<name> run dev` or the Replit Run button.
