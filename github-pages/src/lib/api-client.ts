@@ -193,7 +193,7 @@ async function fetchListRecipes(params?: ListRecipesParams): Promise<RecipeSumma
   if (params?.course) q = q.eq("course", params.course);
   if (params?.cuisine) q = q.eq("cuisine", params.cuisine);
   if (params?.cook) q = q.eq("cook", params.cook);
-  if (params?.attribute) q = q.contains("attribute", [params.attribute]);
+  if (params?.attribute) q = q.filter("attribute", "cs", JSON.stringify([params.attribute]));
   const { data, error } = await q;
   if (error) throw new Error(error.message);
   return (data ?? []).map(rowToSummary);
